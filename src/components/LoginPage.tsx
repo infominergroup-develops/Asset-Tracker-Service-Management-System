@@ -14,11 +14,11 @@ export const LoginPage: React.FC = () => {
     setError('');
 
     // Demo Authentication Logic
-    if (email === 'vikram.sharma@infominer.in' && password === 'password') {
+    if (email === 'swati.katiyar@infominer.in' && password === 'password') {
       setRole('manager');
       setIsAuthenticated(true);
       setActiveTab('dashboard');
-    } else if (email === 'anita.desai@infominer.in' && password === 'password') {
+    } else if (email === 'krishna.mittal@infominer.in' && password === 'password') {
       setRole('director');
       setIsAuthenticated(true);
       setActiveTab('dashboard');
@@ -118,7 +118,7 @@ export const LoginPage: React.FC = () => {
                   </div>
                   <div className="text-left">
                     <div className="text-sm font-medium text-slate-200">Director Login</div>
-                    <div className="text-xs text-slate-400">anita.desai@infominer.in</div>
+                    <div className="text-xs text-slate-400">krishna.mittal@infominer.in</div>
                   </div>
                 </div>
                 <ChevronRight className="w-4 h-4 text-slate-500 group-hover:text-slate-300 transition-colors" />
@@ -139,7 +139,7 @@ export const LoginPage: React.FC = () => {
                   </div>
                   <div className="text-left">
                     <div className="text-sm font-medium text-slate-200">Manager Login</div>
-                    <div className="text-xs text-slate-400">vikram.sharma@infominer.in</div>
+                    <div className="text-xs text-slate-400">swati.katiyar@infominer.in</div>
                   </div>
                 </div>
                 <ChevronRight className="w-4 h-4 text-slate-500 group-hover:text-slate-300 transition-colors" />

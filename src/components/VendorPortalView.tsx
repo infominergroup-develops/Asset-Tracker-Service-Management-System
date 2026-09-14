@@ -28,7 +28,7 @@ export const VendorPortalView: React.FC<VendorPortalViewProps> = ({ onSelectTick
     quotations,
     tickets,
     submitQuotation,
-    updateWorkOrderStatus,
+    updateWorkProgress,
     completeWork,
   } = useApp();
 
@@ -49,6 +49,7 @@ export const VendorPortalView: React.FC<VendorPortalViewProps> = ({ onSelectTick
   // Completion form state
   const [completionSummary, setCompletionSummary] = useState('');
   const [invoiceNumber, setInvoiceNumber] = useState(`INV-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`);
+  const [completionPhotoUrl, setCompletionPhotoUrl] = useState('');
 
   // Active vendor
   const currentVendor = vendors.find((v) => v.id === selectedVendorId) || vendors[0];
@@ -58,13 +59,13 @@ export const VendorPortalView: React.FC<VendorPortalViewProps> = ({ onSelectTick
 
   // Status breakdown
   const pendingQuotes = vendorWorkOrders.filter(
-    (w) => w.status === 'Assigned' || w.status === 'Pending Quotation'
+    (w) => w.status === 'Assigned' || w.status === 'Quotation Pending'
   );
   const inProgress = vendorWorkOrders.filter(
     (w) => w.status === 'Work Scheduled' || w.status === 'Work In Progress' || w.status === 'Awaiting Parts'
   );
   const completedPendingSignoff = vendorWorkOrders.filter(
-    (w) => w.status === 'Work Completed' || w.status === 'Verification Pending'
+    (w) => w.status === 'Work Completed'
   );
   const closedJobs = vendorWorkOrders.filter((w) => w.status === 'Verified & Closed');
 
@@ -79,15 +80,15 @@ export const VendorPortalView: React.FC<VendorPortalViewProps> = ({ onSelectTick
 
     submitQuotation({
       workOrderId: activeWorkOrderForQuote.id,
-      ticketId: activeWorkOrderForQuote.ticketId,
-      vendorId: currentVendor.id,
-      vendorName: currentVendor.name,
+      quotationNumber: `Q-${Date.now()}`,
+      serviceDescription: serviceDescription || 'Standard OEM replacement and diagnostic service.',
       materialCost: Number(materialCost),
       labourCost: Number(labourCost),
       taxes,
+      otherCharges: 0,
       totalAmount: totalQuoteAmount,
-      serviceDescription: serviceDescription || 'Standard OEM replacement and diagnostic service.',
-      documentUrl: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=600&q=80',
+      estimatedDays: 3,
+      pdfUrl: quoteDocumentName,
     });
 
     setActiveWorkOrderForQuote(null);
@@ -98,16 +99,19 @@ export const VendorPortalView: React.FC<VendorPortalViewProps> = ({ onSelectTick
     e.preventDefault();
     if (!activeWorkOrderForCompletion) return;
 
-    completeWork({
-      workOrderId: activeWorkOrderForCompletion.id,
-      completionSummary: completionSummary || 'All parts replaced and equipment thoroughly tested.',
-      completionPhotoUrl: 'https://images.unsplash.com/photo-1581092335397-9583fe92d232?auto=format&fit=crop&w=600&q=80',
-      invoiceNumber: invoiceNumber,
-      invoiceUrl: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=600&q=80',
-    });
+    completeWork(
+      activeWorkOrderForCompletion.id,
+      {
+        completionDescription: completionSummary || 'All parts replaced and equipment thoroughly tested.',
+        vendorInvoiceNumber: invoiceNumber,
+        afterPhotos: completionPhotoUrl ? [completionPhotoUrl] : [],
+        serviceReportUrl: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=600&q=80',
+      }
+    );
 
     setActiveWorkOrderForCompletion(null);
     setCompletionSummary('');
+    setCompletionPhotoUrl('');
   };
 
   return (
@@ -229,7 +233,7 @@ export const VendorPortalView: React.FC<VendorPortalViewProps> = ({ onSelectTick
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-50 p-3 rounded-lg border border-slate-200">
                     <div>
                       <span className="text-slate-400 block text-[11px]">Instructions / Scope</span>
-                      <p className="text-slate-700 mt-0.5">{wo.instructions || 'Standard OEM repair protocol.'}</p>
+                      <p className="text-slate-700 mt-0.5">{wo.requiredWork || 'Standard OEM repair protocol.'}</p>
                     </div>
 
                     {ticket && (
@@ -297,7 +301,7 @@ export const VendorPortalView: React.FC<VendorPortalViewProps> = ({ onSelectTick
                         <>
                           <select
                             value={wo.status}
-                            onChange={(e) => updateWorkOrderStatus(wo.id, e.target.value as WorkOrderStatus)}
+                            onChange={(e) => updateWorkProgress(wo.id, e.target.value as any)}
                             className="px-2.5 py-1.5 rounded-lg bg-white border border-slate-300 font-semibold text-slate-700 text-xs"
                           >
                             <option value="Work Scheduled">Status: Work Scheduled</option>
@@ -481,6 +485,19 @@ export const VendorPortalView: React.FC<VendorPortalViewProps> = ({ onSelectTick
                   value={completionSummary}
                   onChange={(e) => setCompletionSummary(e.target.value)}
                   placeholder="Details of repairs executed, stress test results, serial of installed replacement parts..."
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+                />
+              </div>
+
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1">
+                  Completion Photograph URL (Optional)
+                </label>
+                <input
+                  type="url"
+                  value={completionPhotoUrl}
+                  onChange={(e) => setCompletionPhotoUrl(e.target.value)}
+                  placeholder="https://example.com/photo.jpg"
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg"
                 />
               </div>

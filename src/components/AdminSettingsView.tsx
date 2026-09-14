@@ -23,17 +23,19 @@ export const AdminSettingsView: React.FC = () => {
     resetData,
   } = useApp();
 
-  const [threshold, setThreshold] = useState(approvalConfig.managerThreshold);
-  const [requireDirector, setRequireDirector] = useState(approvalConfig.requireDirectorAboveThreshold);
-  const [autoEscalateHours, setAutoEscalateHours] = useState(approvalConfig.autoEscalateHours);
+  const [threshold, setThreshold] = useState(approvalConfig.managerMaxThreshold);
+  const [requireDirector, setRequireDirector] = useState(approvalConfig.directorRequiredAbove < 9999999);
+  const [autoDispatch, setAutoDispatch] = useState(approvalConfig.autoDispatchVendorOnApprove);
   const [savedSuccess, setSavedSuccess] = useState(false);
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
     updateApprovalConfig({
-      managerThreshold: Number(threshold),
-      requireDirectorAboveThreshold: requireDirector,
-      autoEscalateHours: Number(autoEscalateHours),
+      managerMaxThreshold: Number(threshold),
+      directorRequiredAbove: requireDirector ? Number(threshold) : 999999999,
+      requireDirectorForReplacement: approvalConfig.requireDirectorForReplacement,
+      requireDirectorForDisposal: approvalConfig.requireDirectorForDisposal,
+      autoDispatchVendorOnApprove: autoDispatch,
     });
     setSavedSuccess(true);
     setTimeout(() => setSavedSuccess(false), 2500);
@@ -93,16 +95,19 @@ export const AdminSettingsView: React.FC = () => {
 
           <div>
             <label className="block font-semibold text-slate-700 mb-1">
-              Auto-Escalation Timer (Hours)
+              Auto Dispatch Vendor On Approve
             </label>
-            <input
-              type="number"
-              value={autoEscalateHours}
-              onChange={(e) => setAutoEscalateHours(Number(e.target.value))}
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg font-mono font-bold"
-            />
+            <div className="flex items-center gap-2 mt-2 h-10">
+              <input
+                type="checkbox"
+                checked={autoDispatch}
+                onChange={(e) => setAutoDispatch(e.target.checked)}
+                className="w-4 h-4 rounded text-[#eb8a23] focus:ring-[#eb8a23]"
+              />
+              <span className="font-semibold text-slate-700">Enable Auto-Dispatch</span>
+            </div>
             <span className="text-[11px] text-slate-400 mt-1 block">
-              Tickets pending review past this SLA will trigger high-priority alerts to Directors.
+              Automatically dispatch work order when ticket is approved.
             </span>
           </div>
         </div>

@@ -27,7 +27,7 @@ export const EmployeeTicketForm: React.FC<EmployeeTicketFormProps> = ({
   onTicketCreated,
   onTrackRequested,
 }) => {
-  const { assets, entities, departments, locations, createTicket } = useApp();
+  const { assets, entities, departments, locations, employees, createTicket } = useApp();
 
   // Form states
   const [employeeName, setEmployeeName] = useState('');
@@ -37,6 +37,21 @@ export const EmployeeTicketForm: React.FC<EmployeeTicketFormProps> = ({
   const [department, setDepartment] = useState(departments[0] || 'Technology & Engineering');
   const [entity, setEntity] = useState(entities[0] || 'Infominer Services Pvt. Ltd. (Corporate)');
   const [location, setLocation] = useState(locations[0] || 'Agra Office - 1st Floor Operations Bay');
+
+  // Autofetch employee details on ID change
+  React.useEffect(() => {
+    if (employeeId && employeeId.length >= 3) {
+      const found = employees.find(e => e.id.toLowerCase() === employeeId.toLowerCase());
+      if (found) {
+        setEmployeeName(found.name);
+        setEmployeeEmail(found.email);
+        setEmployeePhone(found.phone);
+        setDepartment(found.department);
+        setEntity(found.entity);
+        setLocation(found.location);
+      }
+    }
+  }, [employeeId, employees]);
 
   // Asset selection
   const [assetSearchQuery, setAssetSearchQuery] = useState('');

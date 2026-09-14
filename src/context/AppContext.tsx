@@ -12,6 +12,7 @@ import {
   UserProfile,
   TicketPriority,
   TicketCategory,
+  Employee,
 } from '../types';
 import {
   INITIAL_ASSETS,
@@ -25,6 +26,7 @@ import {
   INITIAL_ENTITIES,
   INITIAL_DEPARTMENTS,
   INITIAL_LOCATIONS,
+  INITIAL_EMPLOYEES,
 } from '../data/initialData';
 
 export const USER_PROFILES: Record<UserRole, UserProfile> = {
@@ -37,16 +39,16 @@ export const USER_PROFILES: Record<UserRole, UserProfile> = {
   },
   manager: {
     id: 'MGR-01',
-    name: 'Vikram Sharma',
-    email: 'vikram.sharma@infominer.in',
+    name: 'Swati Katiyar',
+    email: 'swati.katiyar@infominer.in',
     role: 'manager',
     department: 'Operations & Service Delivery',
     designation: 'Operations Manager',
   },
   director: {
     id: 'DIR-01',
-    name: 'Anita Desai',
-    email: 'anita.desai@infominer.in',
+    name: 'Krishna Mittal',
+    email: 'krishna.mittal@infominer.in',
     role: 'director',
     designation: 'Managing Director',
   },
@@ -87,6 +89,7 @@ interface AppContextType {
   entities: string[];
   departments: string[];
   locations: string[];
+  employees: Employee[];
 
   // Actions
   createTicket: (data: {
@@ -159,6 +162,9 @@ interface AppContextType {
   createVendor: (vendor: Omit<Vendor, 'id' | 'completedJobsCount' | 'rating' | 'averageTurnaroundDays'>) => void;
   updateVendor: (id: string, updates: Partial<Vendor>) => void;
 
+  createEmployee: (employee: Employee) => void;
+  updateEmployee: (id: string, updates: Partial<Employee>) => void;
+
   updateApprovalConfig: (config: ApprovalConfig) => void;
   markNotificationRead: (id: string) => void;
   markAllNotificationsRead: () => void;
@@ -179,6 +185,7 @@ const STORAGE_KEYS = {
   AUDIT_LOGS: 'infominer_audit_logs_v1',
   NOTIFICATIONS: 'infominer_notifications_v1',
   CONFIG: 'infominer_config_v1',
+  EMPLOYEES: 'infominer_employees_v1',
 };
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -201,6 +208,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [assets, setAssets] = useState<Asset[]>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.ASSETS);
     return saved ? JSON.parse(saved) : INITIAL_ASSETS;
+  });
+
+  const [employees, setEmployees] = useState<Employee[]>(() => {
+    const saved = localStorage.getItem(STORAGE_KEYS.EMPLOYEES);
+    return saved ? JSON.parse(saved) : INITIAL_EMPLOYEES;
   });
 
   const [vendors, setVendors] = useState<Vendor[]>(() => {
@@ -242,6 +254,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.ASSETS, JSON.stringify(assets));
   }, [assets]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.EMPLOYEES, JSON.stringify(employees));
+  }, [employees]);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.TICKETS, JSON.stringify(tickets));
@@ -392,7 +408,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           action: 'Simultaneous Notification Dispatched',
           user: 'System Automated Router',
           role: 'System',
-          comment: 'Notification dispatched to Operations Manager Vikram Sharma and Managing Director Anita Desai simultaneously.',
+          comment: 'Notification dispatched to Operations Manager Swati Katiyar and Managing Director Krishna Mittal simultaneously.',
         },
       ],
       internalComments: [],
@@ -1148,6 +1164,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
   };
 
+  // 14. Employee Management
+  const createEmployee = (employeeData: Employee) => {
+    setEmployees((prev) => [...prev, employeeData]);
+    addAudit('EMPLOYEE_CREATED', `Employee ${employeeData.id}`, {
+      newValue: employeeData.name,
+    });
+  };
+
+  const updateEmployee = (id: string, updates: Partial<Employee>) => {
+    setEmployees((prev) => prev.map((e) => (e.id === id ? { ...e, ...updates } : e)));
+    addAudit('EMPLOYEE_UPDATED', `Employee ${id}`, {
+      newValue: 'Updated Details',
+    });
+  };
+
+  // 15. Admin Utils
   const resetToDefaults = () => {
     localStorage.clear();
     setAssets(INITIAL_ASSETS);
@@ -1158,6 +1190,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setAuditLogs(INITIAL_AUDIT_LOGS);
     setNotifications(INITIAL_NOTIFICATIONS);
     setApprovalConfig(INITIAL_APPROVAL_CONFIG);
+    setEmployees(INITIAL_EMPLOYEES);
+    addAudit('SYSTEM_RESET', 'Configuration & Masters', {
+      comment: 'Reset assets, vendors, employees, and config to defaults.',
+    });
   };
 
   return (
@@ -1181,6 +1217,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         entities: INITIAL_ENTITIES,
         departments: INITIAL_DEPARTMENTS,
         locations: INITIAL_LOCATIONS,
+        employees,
         createTicket,
         approveTicket,
         rejectTicket,
@@ -1197,6 +1234,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         deactivateAsset,
         createVendor,
         updateVendor,
+        createEmployee,
+        updateEmployee,
         updateApprovalConfig,
         markNotificationRead,
         markAllNotificationsRead,

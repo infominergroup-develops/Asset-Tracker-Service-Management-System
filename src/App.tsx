@@ -9,6 +9,7 @@ import { TicketsQueueView } from './components/TicketsQueueView';
 import { AssetMasterView } from './components/AssetMasterView';
 import { VendorPortalView } from './components/VendorPortalView';
 import { VendorsDirectoryView } from './components/VendorsDirectoryView';
+import { EmployeesDirectoryView } from './components/EmployeesDirectoryView';
 import { QuotationsListView } from './components/QuotationsListView';
 import { AuditLogView } from './components/AuditLogView';
 import { AdminSettingsView } from './components/AdminSettingsView';
@@ -96,6 +97,7 @@ const MainLayout: React.FC = () => {
         )}
 
         {activeTab === 'vendors' && <VendorsDirectoryView />}
+        {activeTab === 'employees' && <EmployeesDirectoryView />}
 
         {activeTab === 'quotations' && (
           <QuotationsListView onSelectTicket={(t) => setSelectedTicket(t)} />
@@ -123,6 +125,7 @@ const MainLayout: React.FC = () => {
           'vendor-quotations',
           'vendor-history',
           'vendors',
+          'employees',
           'quotations',
           'audit-log',
           'admin-audit',

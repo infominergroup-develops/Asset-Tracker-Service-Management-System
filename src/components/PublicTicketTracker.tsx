@@ -79,7 +79,7 @@ export const PublicTicketTracker: React.FC<PublicTicketTrackerProps> = ({ initia
     switch (status) {
       case 'Submitted':
       case 'Under Management Review':
-        return 'Management review in progress. Operations Manager Vikram Sharma and Director Anita Desai will review priority and assign service vendor.';
+        return 'Management review in progress. Operations Manager Swati Katiyar and Director Krishna Mittal will review priority and assign service vendor.';
       case 'Clarification Required':
         return 'Management requires additional details regarding this failure before proceeding.';
       case 'Approved':

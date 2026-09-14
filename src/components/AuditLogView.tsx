@@ -22,13 +22,13 @@ export const AuditLogView: React.FC = () => {
 
   const filteredLogs = auditLogs.filter((log) => {
     const matchesSearch =
-      log.userName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      log.user.toLowerCase().includes(searchQuery.toLowerCase()) ||
       log.action.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      log.entityId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      log.systemNotes.toLowerCase().includes(searchQuery.toLowerCase());
+      log.entityAffected.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (log.comment || '').toLowerCase().includes(searchQuery.toLowerCase());
 
     const matchesAction = actionFilter === 'All' || log.action === actionFilter;
-    const matchesOverride = overrideOnly ? log.isOverride : true;
+    const matchesOverride = overrideOnly ? (log.comment || '').includes('OVERRIDE') : true;
 
     return matchesSearch && matchesAction && matchesOverride;
   });
@@ -52,15 +52,15 @@ export const AuditLogView: React.FC = () => {
     const rows = filteredLogs.map((l) => [
       l.id,
       l.timestamp,
-      `"${l.userName}"`,
-      l.userRole,
+      `"${l.user}"`,
+      l.role,
       `"${l.action}"`,
-      l.entityType,
-      l.entityId,
+      l.ticketId ? 'Ticket' : (l.assetId ? 'Asset' : 'System'),
+      l.entityAffected,
       `"${l.oldValue || ''}"`,
       `"${l.newValue || ''}"`,
-      l.isOverride ? 'YES' : 'NO',
-      `"${l.systemNotes.replace(/"/g, '""')}"`,
+      (l.comment || '').includes('OVERRIDE') ? 'YES' : 'NO',
+      `"${(l.comment || '').replace(/"/g, '""')}"`,
       l.ipAddress || '',
     ]);
 
@@ -177,9 +177,9 @@ export const AuditLogView: React.FC = () => {
 
                     {/* Actor */}
                     <td className="px-4 py-3">
-                      <div className="font-bold text-slate-800">{log.userName}</div>
+                      <div className="font-bold text-slate-800">{log.user}</div>
                       <div className="text-[10px] text-slate-500 uppercase tracking-wider font-mono">
-                        {log.userRole}
+                        {log.role}
                       </div>
                     </td>
 
@@ -188,9 +188,9 @@ export const AuditLogView: React.FC = () => {
 
                     {/* Entity Target */}
                     <td className="px-4 py-3 font-mono">
-                      <span className="text-[#eb8a23] font-bold">{log.entityId}</span>
+                      <span className="text-[#eb8a23] font-bold">{log.entityAffected}</span>
                       <span className="text-slate-400 text-[10px] block uppercase">
-                        {log.entityType}
+                        {log.ticketId ? 'Ticket' : (log.assetId ? 'Asset' : 'System')}
                       </span>
                     </td>
 
@@ -209,14 +209,13 @@ export const AuditLogView: React.FC = () => {
                       )}
                     </td>
 
-                    {/* System Notes */}
-                    <td className="px-4 py-3 text-slate-600 max-w-xs truncate" title={log.systemNotes}>
-                      {log.systemNotes}
+                    <td className="px-4 py-3 text-slate-600 max-w-xs truncate" title={log.comment || ''}>
+                      {log.comment || ''}
                     </td>
 
                     {/* Override Flag */}
                     <td className="px-4 py-3 text-right">
-                      {log.isOverride ? (
+                      {(log.comment || '').includes('OVERRIDE') ? (
                         <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-[#eb8a23] text-white shadow-2xs">
                           OVERRIDE
                         </span>

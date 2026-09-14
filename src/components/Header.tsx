@@ -70,7 +70,7 @@ export const Header: React.FC<HeaderProps> = ({
     if (newRole === 'employee') {
       setActiveTab('report-issue');
     } else if (newRole === 'vendor') {
-      setActiveTab('vendor-portal');
+      setActiveTab('vendor-orders');
     } else {
       setActiveTab('dashboard');
     }
@@ -146,6 +146,26 @@ export const Header: React.FC<HeaderProps> = ({
                   <div className="px-3 py-2 border-b border-slate-700/80">
                     <p className="font-bold text-slate-200">{currentUser.name}</p>
                     <p className="text-[11px] text-slate-400">{currentUser.email}</p>
+                  </div>
+
+                  <div className="p-2">
+                    {(['employee', 'manager', 'director', 'admin', 'vendor'] as UserRole[]).map((r) => (
+                      <button
+                        key={r}
+                        onClick={() => handleRoleChange(r)}
+                        className={`w-full flex items-center justify-between px-3 py-2 rounded-md transition ${
+                          role === r
+                            ? 'bg-slate-800 text-white font-bold'
+                            : 'text-slate-400 hover:text-slate-200 hover:bg-slate-700/50'
+                        }`}
+                      >
+                        <span className="flex items-center gap-2">
+                          {getRoleBadge(r).icon}
+                          {getRoleBadge(r).label}
+                        </span>
+                        {role === r && <CheckCircle2 className="w-3.5 h-3.5 text-[#eb8a23]" />}
+                      </button>
+                    ))}
                   </div>
 
                   <div className="p-2 border-t border-slate-700/80">
@@ -361,6 +381,17 @@ export const Header: React.FC<HeaderProps> = ({
                   Vendors &amp; Performance
                 </button>
                 <button
+                  id="tab-mgmt-employees"
+                  onClick={() => setActiveTab('employees')}
+                  className={`px-3 py-1.5 rounded-md font-medium transition ${
+                    activeTab === 'employees'
+                      ? 'bg-[#eb8a23] text-white shadow-xs font-bold'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200'
+                  }`}
+                >
+                  Employees
+                </button>
+                <button
                   id="tab-mgmt-reports"
                   onClick={() => setActiveTab('reports')}
                   className={`px-3 py-1.5 rounded-md font-medium transition ${
@@ -431,6 +462,17 @@ export const Header: React.FC<HeaderProps> = ({
                   }`}
                 >
                   Permanent Audit Logs
+                </button>
+                <button
+                  id="tab-admin-employees"
+                  onClick={() => setActiveTab('employees')}
+                  className={`px-3 py-1.5 rounded-md font-medium transition ${
+                    activeTab === 'employees'
+                      ? 'bg-[#eb8a23] text-white shadow-xs font-bold'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200'
+                  }`}
+                >
+                  Employees Directory
                 </button>
                 <button
                   id="tab-admin-reports"

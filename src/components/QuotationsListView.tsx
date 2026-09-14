@@ -65,17 +65,17 @@ export const QuotationsListView: React.FC<QuotationsListViewProps> = ({ onSelect
     // Check threshold rules:
     // If threshold enabled and amount > threshold (e.g. ₹10,000)
     // and user is manager (not director/admin), require override or block
-    const isAboveThreshold = reviewingQuote.totalAmount > approvalConfig.managerThreshold;
+    const isAboveThreshold = reviewingQuote.totalAmount > approvalConfig.managerMaxThreshold;
 
     if (
-      approvalConfig.requireDirectorAboveThreshold &&
+      approvalConfig.directorRequiredAbove &&
       isAboveThreshold &&
       role === 'manager' &&
       decision === 'Approved'
     ) {
       if (!overrideNotes.trim()) {
         setErrorMessage(
-          `This quote of ₹${reviewingQuote.totalAmount.toLocaleString()} exceeds the ₹${approvalConfig.managerThreshold.toLocaleString()} Manager Approval Limit. Director approval or mandatory Manager Budget Override justification is required.`
+          `This quote of ₹${reviewingQuote.totalAmount.toLocaleString()} exceeds the ₹${approvalConfig.managerMaxThreshold.toLocaleString()} Manager Approval Limit. Director approval or mandatory Manager Budget Override justification is required.`
         );
         return;
       }
@@ -104,7 +104,7 @@ export const QuotationsListView: React.FC<QuotationsListViewProps> = ({ onSelect
               FINANCIAL APPROVAL REGISTRY
             </span>
             <span className="text-xs text-slate-300">
-              Limit Policy: Up to ₹{approvalConfig.managerThreshold.toLocaleString()} (Manager) • Above: Director Sanction
+              Limit Policy: Up to ₹{approvalConfig.managerMaxThreshold.toLocaleString()} (Manager) • Above: Director Sanction
             </span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black">Vendor Quotations &amp; Billing</h1>
@@ -273,14 +273,14 @@ export const QuotationsListView: React.FC<QuotationsListViewProps> = ({ onSelect
               </div>
 
               {/* Threshold indicator */}
-              {reviewingQuote.totalAmount > approvalConfig.managerThreshold && (
+              {reviewingQuote.totalAmount > approvalConfig.managerMaxThreshold && (
                 <div className="bg-amber-50 border border-amber-300 p-3 rounded-lg text-amber-900">
                   <div className="font-bold flex items-center gap-1.5 mb-1">
                     <ShieldAlert className="w-4 h-4 text-amber-600" />
                     High-Value Sanction Threshold Alert
                   </div>
                   <p className="text-[11px] leading-relaxed">
-                    This amount exceeds the Manager sanction limit of ₹{approvalConfig.managerThreshold.toLocaleString()}.
+                    This amount exceeds the Manager sanction limit of ₹{approvalConfig.managerMaxThreshold.toLocaleString()}.
                     If approving as a Manager, a mandatory Budget Override Justification will be stamped permanently in the immutable audit log.
                   </p>
                 </div>
@@ -327,7 +327,7 @@ export const QuotationsListView: React.FC<QuotationsListViewProps> = ({ onSelect
               </div>
 
               {/* Budget Override Notes (if manager and above threshold) */}
-              {decision === 'Approved' && reviewingQuote.totalAmount > approvalConfig.managerThreshold && (
+              {decision === 'Approved' && reviewingQuote.totalAmount > approvalConfig.managerMaxThreshold && (
                 <div>
                   <label className="block font-semibold text-amber-800 mb-1">
                     Manager Budget Override Justification <span className="text-rose-500">*</span>

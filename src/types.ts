@@ -11,6 +11,16 @@ export interface UserProfile {
   avatarUrl?: string;
 }
 
+export interface Employee {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  department: string;
+  entity: string;
+  location: string;
+}
+
 export type AssetCondition = 'Excellent' | 'Good' | 'Fair' | 'Poor' | 'Defective';
 
 export type AssetStatus = 
