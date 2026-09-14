@@ -1,0 +1,7 @@
+{
+  "name": "Asset Tracker & Service Management System",
+  "description": "Centralized asset tracking and lifecycle service management system for Infominer Services Pvt. Ltd. featuring employee ticket submission, management approvals, vendor quotations, and audit workflows.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+
