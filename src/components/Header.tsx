@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { useApp, USER_PROFILES } from '../context/AppContext';
+import { useApp } from '../context/AppContext';
+import { USER_PROFILES } from '../data/users';
 import { InfominerLogo } from './InfominerLogo';
 import { UserRole } from '../types';
 import {
@@ -20,16 +21,18 @@ import {
 interface HeaderProps {
   activeTab?: string;
   setActiveTab?: (tab: string) => void;
+  onLoginClick?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   activeTab: propActiveTab,
   setActiveTab: propSetActiveTab,
+  onLoginClick
 }) => {
   const {
     role,
-    setRole,
-    setIsAuthenticated,
+    logout,
+    isAuthenticated,
     activeTab: contextActiveTab,
     setActiveTab: contextSetActiveTab,
     currentUser,
@@ -45,7 +48,6 @@ export const Header: React.FC<HeaderProps> = ({
   const activeTab = propActiveTab || contextActiveTab || 'dashboard';
   const setActiveTab = propSetActiveTab || contextSetActiveTab;
 
-  const [showRoleMenu, setShowRoleMenu] = useState(false);
   const [showNotifMenu, setShowNotifMenu] = useState(false);
 
   // Financial metric for navbar highlight
@@ -63,18 +65,7 @@ export const Header: React.FC<HeaderProps> = ({
     (n) => !n.read && (n.targetRoles.includes(role) || n.targetRoles.includes('employee'))
   );
 
-  const handleRoleChange = (newRole: UserRole) => {
-    setRole(newRole);
-    setShowRoleMenu(false);
-    // Switch default tab for role
-    if (newRole === 'employee') {
-      setActiveTab('report-issue');
-    } else if (newRole === 'vendor') {
-      setActiveTab('vendor-orders');
-    } else {
-      setActiveTab('dashboard');
-    }
-  };
+  // No handleRoleChange anymore
 
   const getRoleBadge = (r: UserRole) => {
     switch (r) {
@@ -124,71 +115,31 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Right Action Tools: Role Switcher & Notifications */}
           <div className="flex items-center gap-3">
-            {/* Quick Demo Role Switcher Dropdown */}
-            <div className="relative">
-              <button
-                id="role-switcher-button"
-                onClick={() => setShowRoleMenu(!showRoleMenu)}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white hover:bg-slate-50 border border-slate-200 transition text-xs font-medium shadow-xs text-slate-900"
-              >
-                <span className="flex items-center gap-1.5 font-bold text-slate-900">
-                  {getRoleBadge(role).icon}
-                  {currentUser.name}
-                </span>
-                <ChevronDown className="w-3.5 h-3.5 text-slate-500" />
-              </button>
-
-              {showRoleMenu && (
-                <div
-                  id="role-switcher-dropdown"
-                  className="absolute right-0 mt-2 w-64 rounded-lg bg-[#1e293b] border border-slate-700 shadow-xl py-1.5 z-50 text-xs"
-                >
-                  <div className="px-3 py-2 border-b border-slate-700/80">
-                    <p className="font-bold text-slate-200">{currentUser.name}</p>
-                    <p className="text-[11px] text-slate-400">{currentUser.email}</p>
+            {/* User Profile & Logout / Staff Login */}
+            <div className="flex items-center gap-4 border-r border-slate-200 pr-4 mr-1">
+              {isAuthenticated ? (
+                <>
+                  <div className="flex flex-col items-end hidden sm:flex">
+                    <span className="text-sm font-bold text-slate-900">{currentUser?.name || 'User'}</span>
+                    <span className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">{getRoleBadge(role)?.label || 'Role'}</span>
                   </div>
-
-                  <div className="p-2">
-                    {(['employee', 'manager', 'director', 'admin', 'vendor'] as UserRole[]).map((r) => (
-                      <button
-                        key={r}
-                        onClick={() => handleRoleChange(r)}
-                        className={`w-full flex items-center justify-between px-3 py-2 rounded-md transition ${
-                          role === r
-                            ? 'bg-slate-800 text-white font-bold'
-                            : 'text-slate-400 hover:text-slate-200 hover:bg-slate-700/50'
-                        }`}
-                      >
-                        <span className="flex items-center gap-2">
-                          {getRoleBadge(r).icon}
-                          {getRoleBadge(r).label}
-                        </span>
-                        {role === r && <CheckCircle2 className="w-3.5 h-3.5 text-[#eb8a23]" />}
-                      </button>
-                    ))}
-                  </div>
-
-                  <div className="p-2 border-t border-slate-700/80">
-                    <button
-                      onClick={() => {
-                        resetToDefaults();
-                        setShowRoleMenu(false);
-                      }}
-                      className="w-full flex items-center justify-center gap-1.5 py-1.5 text-[11px] text-slate-400 hover:text-white hover:bg-slate-800 rounded transition mb-2"
-                    >
-                      <RotateCcw className="w-3 h-3" /> Reset Demo Seed Data
-                    </button>
-                    <button
-                      onClick={() => {
-                        setIsAuthenticated(false);
-                        setShowRoleMenu(false);
-                      }}
-                      className="w-full flex items-center justify-center gap-1.5 py-1.5 font-medium text-red-400 hover:text-red-300 hover:bg-slate-800 rounded transition"
-                    >
-                      Log Out
-                    </button>
-                  </div>
-                </div>
+                  <button
+                    onClick={() => logout()}
+                    className="px-3 py-1.5 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 border border-rose-100 transition text-xs font-bold shadow-xs flex items-center gap-1"
+                  >
+                    Sign Out
+                  </button>
+                </>
+              ) : (
+                onLoginClick && (
+                  <button
+                    onClick={onLoginClick}
+                    className="px-4 py-1.5 rounded-lg bg-slate-800 text-white hover:bg-slate-700 transition text-xs font-bold shadow-xs flex items-center gap-2"
+                  >
+                    <User className="w-3.5 h-3.5" />
+                    Staff Login
+                  </button>
+                )
               )}
             </div>
 
@@ -391,6 +342,19 @@ export const Header: React.FC<HeaderProps> = ({
                 >
                   Employees
                 </button>
+                {role === 'director' && (
+                  <button
+                    id="tab-mgmt-user-management"
+                    onClick={() => setActiveTab('user-management')}
+                    className={`px-3 py-1.5 rounded-md font-medium transition ${
+                      activeTab === 'user-management'
+                        ? 'bg-[#eb8a23] text-white shadow-xs font-bold'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200'
+                    }`}
+                  >
+                    User Management
+                  </button>
+                )}
                 <button
                   id="tab-mgmt-reports"
                   onClick={() => setActiveTab('reports')}

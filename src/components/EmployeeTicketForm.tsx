@@ -129,7 +129,7 @@ export const EmployeeTicketForm: React.FC<EmployeeTicketFormProps> = ({
     }
   };
 
-  const handleFinalSubmit = () => {
+  const handleFinalSubmit = async () => {
     const finalAssetId = isAssetNotListed ? 'AST-UNLISTED' : selectedAsset ? selectedAsset.id : 'AST-UNLISTED';
     const finalAssetName = isAssetNotListed
       ? manualAssetName
@@ -142,7 +142,7 @@ export const EmployeeTicketForm: React.FC<EmployeeTicketFormProps> = ({
       ? selectedAsset.category
       : 'Other Facilities';
 
-    const ticketId = createTicket({
+    const ticketId = await createTicket({
       assetId: finalAssetId,
       assetName: finalAssetName,
       assetCategory: finalCategory,

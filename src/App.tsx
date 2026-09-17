@@ -14,22 +14,31 @@ import { QuotationsListView } from './components/QuotationsListView';
 import { AuditLogView } from './components/AuditLogView';
 import { AdminSettingsView } from './components/AdminSettingsView';
 import { TicketDetailModal } from './components/TicketDetailModal';
+import { UserManagementView } from './components/UserManagementView';
 import { Ticket, Asset } from './types';
 import { InfominerLogo } from './components/InfominerLogo';
 
 const MainLayout: React.FC = () => {
   const { role, activeTab, setActiveTab, isAuthenticated } = useApp();
-
-  if (!isAuthenticated) {
-    return <LoginPage />;
-  }
-
+  const [showStaffLogin, setShowStaffLogin] = useState(true);
+  
   // Selected ticket for modal
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
 
   // Deep linking between views
   const [trackerTicketId, setTrackerTicketId] = useState<string>('');
   const [selectedAssetForDetail, setSelectedAssetForDetail] = useState<string | null>(null);
+
+  if (!isAuthenticated && showStaffLogin) {
+    return (
+      <LoginPage 
+        onBack={() => {
+          setShowStaffLogin(false);
+          setActiveTab('report-issue');
+        }} 
+      />
+    );
+  }
 
   const handleTicketCreated = (ticketId: string) => {
     setTrackerTicketId(ticketId);
@@ -53,7 +62,7 @@ const MainLayout: React.FC = () => {
   return (
     <div className="min-h-screen bg-slate-100 flex flex-col font-sans text-slate-800 antialiased selection:bg-[#eb8a23]/20 selection:text-[#d97917]">
       {/* Sticky Top Header */}
-      <Header activeTab={activeTab} setActiveTab={setActiveTab} />
+      <Header activeTab={activeTab} setActiveTab={setActiveTab} onLoginClick={() => setShowStaffLogin(true)} />
 
       {/* Main Content Area based on activeTab */}
       <main className="flex-1 pb-16">
@@ -109,6 +118,8 @@ const MainLayout: React.FC = () => {
 
         {(activeTab === 'settings' || activeTab === 'admin-config') && <AdminSettingsView />}
 
+        {activeTab === 'user-management' && role === 'director' && <UserManagementView />}
+
         {/* Fallback default view if activeTab is unset or invalid */}
         {![
           'report-issue',
@@ -132,6 +143,7 @@ const MainLayout: React.FC = () => {
           'reports',
           'settings',
           'admin-config',
+          'user-management',
         ].includes(activeTab) && (
           role === 'employee' ? (
             <EmployeeTicketForm

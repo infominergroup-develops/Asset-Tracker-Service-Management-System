@@ -11,7 +11,9 @@ import {
   RotateCcw,
   CheckCircle2,
   Save,
+  Database as DatabaseIcon,
 } from 'lucide-react';
+import { seedFirestore } from '../utils/seedDatabase';
 
 export const AdminSettingsView: React.FC = () => {
   const {
@@ -193,6 +195,31 @@ export const AdminSettingsView: React.FC = () => {
         >
           <RotateCcw className="w-4 h-4" /> Reset Factory Seed Data
         </button>
+      </div>
+
+      {/* Database Management Card */}
+      <div className="bg-white rounded-xl shadow-xs border border-slate-200 overflow-hidden mt-6">
+        <div className="p-6 border-b border-slate-100 bg-slate-50/50">
+          <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+            <DatabaseIcon className="w-5 h-5 text-purple-500" />
+            Database Management
+          </h2>
+          <p className="text-sm text-slate-500 mt-1">Tools to manage the Firestore database connection.</p>
+        </div>
+        <div className="p-6 space-y-6">
+          <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
+            <h3 className="font-semibold text-slate-800 text-sm mb-2">Initialize Database</h3>
+            <p className="text-xs text-slate-500 mb-4">
+              Push the initial dummy data (users and assets) to the empty Firestore database. Run this once after connecting a new Firebase project.
+            </p>
+            <button
+              onClick={seedFirestore}
+              className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg shadow-xs text-sm font-medium transition"
+            >
+              Seed Database Now
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );

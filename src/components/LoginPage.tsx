@@ -3,34 +3,26 @@ import { useApp } from '../context/AppContext';
 import { InfominerLogo } from './InfominerLogo';
 import { Lock, Mail, ChevronRight, User } from 'lucide-react';
 
-export const LoginPage: React.FC = () => {
-  const { setRole, setIsAuthenticated, setActiveTab } = useApp();
+interface LoginPageProps {
+  onBack?: () => void;
+}
+
+export const LoginPage: React.FC<LoginPageProps> = ({ onBack }) => {
+  const { login, setActiveTab } = useApp();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
-    // Demo Authentication Logic
-    if (email === 'swati.katiyar@infominer.in' && password === 'password') {
-      setRole('manager');
-      setIsAuthenticated(true);
-      setActiveTab('dashboard');
-    } else if (email === 'krishna.mittal@infominer.in' && password === 'password') {
-      setRole('director');
-      setIsAuthenticated(true);
-      setActiveTab('dashboard');
+    const errorMsg = await login(email, password);
+    if (!errorMsg) {
+      // success, context handles routing
     } else {
-      setError('Invalid credentials. Please use demo credentials.');
+      setError(errorMsg);
     }
-  };
-
-  const loginAsEmployee = () => {
-    setRole('employee');
-    setIsAuthenticated(true);
-    setActiveTab('report-issue');
   };
 
   return (
@@ -96,64 +88,24 @@ export const LoginPage: React.FC = () => {
             >
               Sign In
             </button>
+          {onBack && (
+            <button
+              type="button"
+              onClick={onBack}
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-transparent hover:bg-slate-700 text-slate-300 rounded-xl transition text-sm font-medium border border-slate-600"
+            >
+              Back to Public Portal
+            </button>
+          )}
           </form>
 
           <div className="mt-8 pt-6 border-t border-slate-700/60">
             <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-4 text-center">
-              Demo Credentials
+              Login Roles
             </h3>
-            <div className="grid grid-cols-1 gap-3">
-              <button
-                onClick={() => {
-                  setRole('director');
-                  setIsAuthenticated(true);
-                  setActiveTab('dashboard');
-                }}
-                type="button"
-                className="flex items-center justify-between p-3 rounded-lg bg-slate-700/30 hover:bg-slate-700/50 border border-slate-600/50 transition-colors group"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="bg-purple-500/20 p-2 rounded-md group-hover:bg-purple-500/30 transition-colors">
-                    <User className="w-4 h-4 text-purple-400" />
-                  </div>
-                  <div className="text-left">
-                    <div className="text-sm font-medium text-slate-200">Director Login</div>
-                    <div className="text-xs text-slate-400">krishna.mittal@infominer.in</div>
-                  </div>
-                </div>
-                <ChevronRight className="w-4 h-4 text-slate-500 group-hover:text-slate-300 transition-colors" />
-              </button>
-              
-              <button
-                onClick={() => {
-                  setRole('manager');
-                  setIsAuthenticated(true);
-                  setActiveTab('dashboard');
-                }}
-                type="button"
-                className="flex items-center justify-between p-3 rounded-lg bg-slate-700/30 hover:bg-slate-700/50 border border-slate-600/50 transition-colors group"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="bg-blue-500/20 p-2 rounded-md group-hover:bg-blue-500/30 transition-colors">
-                    <User className="w-4 h-4 text-blue-400" />
-                  </div>
-                  <div className="text-left">
-                    <div className="text-sm font-medium text-slate-200">Manager Login</div>
-                    <div className="text-xs text-slate-400">swati.katiyar@infominer.in</div>
-                  </div>
-                </div>
-                <ChevronRight className="w-4 h-4 text-slate-500 group-hover:text-slate-300 transition-colors" />
-              </button>
-
-              <button
-                onClick={loginAsEmployee}
-                type="button"
-                className="flex items-center justify-center p-3 rounded-lg bg-slate-700/30 hover:bg-slate-700/50 border border-slate-600/50 transition-colors group mt-2"
-              >
-                <span className="text-sm font-medium text-slate-300 group-hover:text-white transition-colors">
-                  Continue to Public Employee Portal
-                </span>
-              </button>
+            <div className="text-xs text-slate-400 text-center space-y-1">
+              <p>Manager, Director, or Vendor only.</p>
+              <p>Contact your Director for access.</p>
             </div>
           </div>
         </div>
