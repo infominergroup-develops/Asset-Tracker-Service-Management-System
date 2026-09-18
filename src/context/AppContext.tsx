@@ -217,6 +217,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           return null;
         } catch (regError: any) {
           console.error("Auto-registration failed:", regError);
+          if (regError.code === 'auth/email-already-in-use') {
+            return "Incorrect password for this existing account.";
+          }
           return regError.message || "Failed to register user.";
         }
       }
