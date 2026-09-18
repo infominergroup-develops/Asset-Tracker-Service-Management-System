@@ -30,7 +30,7 @@ export const AssetMasterView: React.FC<AssetMasterViewProps> = ({
   initialSelectedAssetId,
   onRaiseTicketForAsset,
 }) => {
-  const { assets, tickets, vendors, entities, departments, locations, createAsset, updateAsset, role } = useApp();
+  const { assets, tickets, vendors, entities, departments, locations, employees, createAsset, updateAsset, createVendor, createEmployee, role } = useApp();
 
   const [selectedAssetId, setSelectedAssetId] = useState<string | null>(initialSelectedAssetId || null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -49,6 +49,7 @@ export const AssetMasterView: React.FC<AssetMasterViewProps> = ({
   const [newPurchaseCost, setNewPurchaseCost] = useState('65000');
   const [newWarrantyExpiry, setNewWarrantyExpiry] = useState('2027-01-01');
   const [newVendorId, setNewVendorId] = useState(vendors[0]?.id || '');
+  const [newVendorName, setNewVendorName] = useState('');
   const [newEntity, setNewEntity] = useState(entities[0] || '');
   const [newDept, setNewDept] = useState(departments[0] || '');
   const [newLocation, setNewLocation] = useState(locations[0] || '');
@@ -79,11 +80,48 @@ export const AssetMasterView: React.FC<AssetMasterViewProps> = ({
     ? tickets.filter((t) => t.assetId === selectedAsset.id)
     : [];
 
-  const handleCreateAsset = (e: React.FormEvent) => {
+  const handleCreateAsset = async (e: React.FormEvent) => {
     e.preventDefault();
-    const vendor = vendors.find((v) => v.id === newVendorId) || vendors[0];
+    
+    let finalVendorId = vendors[0]?.id || 'VND-001';
+    let finalVendorName = newVendorName.trim() || vendors[0]?.name || 'Unknown Vendor';
+    
+    if (newVendorName.trim()) {
+      const existingVendor = vendors.find(v => v.name.toLowerCase() === newVendorName.trim().toLowerCase());
+      if (existingVendor) {
+        finalVendorId = existingVendor.id;
+        finalVendorName = existingVendor.name;
+      } else {
+        finalVendorId = await createVendor({
+          name: newVendorName.trim(),
+          category: 'Hardware',
+          contactPerson: 'TBD',
+          email: 'tbd@example.com',
+          phone: '0000000000',
+          status: 'Active',
+          address: 'TBD',
+          gstNumber: 'TBD'
+        });
+        finalVendorName = newVendorName.trim();
+      }
+    }
 
-    createAsset({
+    if (newEmployeeName.trim()) {
+      const existingEmployee = employees?.find(emp => emp.name.toLowerCase() === newEmployeeName.trim().toLowerCase());
+      if (!existingEmployee && createEmployee) {
+        await createEmployee({
+          id: `EMP-${Date.now()}`,
+          name: newEmployeeName.trim(),
+          department: newDept,
+          entity: newEntity,
+          email: `${newEmployeeName.trim().toLowerCase().replace(/\s+/g, '.')}@example.com`,
+          phone: '0000000000',
+          location: newLocation
+        });
+      }
+    }
+
+    await createAsset({
       name: newName,
       category: newCategory,
       type: newType,
@@ -93,8 +131,8 @@ export const AssetMasterView: React.FC<AssetMasterViewProps> = ({
       purchaseDate: newPurchaseDate,
       purchaseCost: Number(newPurchaseCost) || 0,
       warrantyExpiry: newWarrantyExpiry,
-      vendorId: vendor.id,
-      vendorName: vendor.name,
+      vendorId: finalVendorId,
+      vendorName: finalVendorName,
       entity: newEntity,
       department: newDept,
       location: newLocation,
@@ -573,6 +611,18 @@ export const AssetMasterView: React.FC<AssetMasterViewProps> = ({
                     required
                     value={newWarrantyExpiry}
                     onChange={(e) => setNewWarrantyExpiry(e.target.value)}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">Vendor Name</label>
+                  <input
+                    type="text"
+                    required
+                    value={newVendorName}
+                    onChange={(e) => setNewVendorName(e.target.value)}
+                    placeholder="e.g. Dell Inc."
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg"
                   />
                 </div>

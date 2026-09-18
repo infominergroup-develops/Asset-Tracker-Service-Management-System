@@ -125,7 +125,7 @@ interface AppContextType {
   updateAsset: (id: string, updates: Partial<Asset>) => Promise<void>;
   deactivateAsset: (id: string, reason: string) => Promise<void>;
 
-  createVendor: (vendor: Omit<Vendor, 'id' | 'completedJobsCount' | 'rating' | 'averageTurnaroundDays'>) => Promise<void>;
+  createVendor: (vendor: Omit<Vendor, 'id' | 'completedJobsCount' | 'rating' | 'averageTurnaroundDays'>) => Promise<string>;
   updateVendor: (id: string, updates: Partial<Vendor>) => Promise<void>;
 
   createEmployee: (employee: Employee) => Promise<void>;
@@ -960,7 +960,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   // 13. Vendor Management
-  const createVendor = async (vendorData: Omit<Vendor, 'id' | 'completedJobsCount' | 'rating' | 'averageTurnaroundDays'>) => {
+  const createVendor = async (vendorData: Omit<Vendor, 'id' | 'completedJobsCount' | 'rating' | 'averageTurnaroundDays'>): Promise<string> => {
     const newId = `VND-${String(vendors.length + 1).padStart(3, '0')}`;
     const newVendor: Vendor = {
       ...vendorData,
@@ -969,17 +969,27 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       rating: 5.0,
       averageTurnaroundDays: 2.0,
     };
-    setVendors((prev) => [...prev, newVendor]);
-    addAudit('VENDOR_CREATED', `Vendor ${newId}`, {
-      comment: `Added ${vendorData.name}`,
-    });
+    try {
+      await setDoc(doc(db, "vendors", newId), newVendor);
+      addAudit('VENDOR_CREATED', `Vendor ${newId}`, {
+        comment: `Added ${vendorData.name}`,
+      });
+      return newId;
+    } catch (e) {
+      console.error("Error creating vendor:", e);
+      throw e;
+    }
   };
 
   const updateVendor = async (id: string, updates: Partial<Vendor>) => {
-    setVendors((prev) => prev.map((v) => (v.id === id ? { ...v, ...updates } : v)));
-    addAudit('VENDOR_UPDATED', `Vendor ${id}`, {
-      comment: `Updated details for ${id}`,
-    });
+    try {
+      await updateDoc(doc(db, "vendors", id), updates);
+      addAudit('VENDOR_UPDATED', `Vendor ${id}`, {
+        comment: `Updated details for ${id}`,
+      });
+    } catch (e) {
+      console.error("Error updating vendor:", e);
+    }
   };
 
   // 14. Approval Config
