@@ -104,7 +104,7 @@ export const VendorsDirectoryView: React.FC = () => {
             Empaneled OEM maintenance suppliers, SLAs, verified GST records, and turnaround ratings.
           </p>
         </div>
-        {(role === 'manager' || role === 'admin') && (
+        {(role === 'manager' || role === 'admin' || role === 'director') && (
           <button
             onClick={openAddModal}
             className="px-4 py-2 rounded-lg bg-[#eb8a23] hover:bg-[#d97917] text-white font-bold text-xs shadow-sm transition flex items-center gap-1.5"
@@ -199,13 +199,13 @@ export const VendorsDirectoryView: React.FC = () => {
                     <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-500" />
                     {vendor.rating}
                   </div>
-                  {(role === 'manager' || role === 'admin') && (
+                  {(role === 'manager' || role === 'admin' || role === 'director') && (
                     <button
                       onClick={() => openEditModal(vendor)}
-                      className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 transition"
+                      className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 transition ml-2"
                       title="Edit Vendor"
                     >
-                      <Edit2 className="w-4 h-4" />
+                      <Edit2 className="w-3.5 h-3.5" />
                     </button>
                   )}
                 </div>

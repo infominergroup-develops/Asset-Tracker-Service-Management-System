@@ -392,7 +392,7 @@ export const AssetMasterView: React.FC<AssetMasterViewProps> = ({
         </div>
 
         <div className="flex items-center gap-2">
-          {(role === 'admin' || role === 'manager') && (
+          {(role === 'admin' || role === 'manager' || role === 'director') && (
             <button
               id="create-new-asset-btn"
               onClick={() => setShowCreateModal(true)}

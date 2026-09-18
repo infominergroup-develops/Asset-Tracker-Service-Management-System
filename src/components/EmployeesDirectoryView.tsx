@@ -98,7 +98,7 @@ export const EmployeesDirectoryView: React.FC = () => {
             Manage organization employees, their departments, and contact details.
           </p>
         </div>
-        {(role === 'manager' || role === 'admin') && (
+        {(role === 'manager' || role === 'admin' || role === 'director') && (
           <button
             onClick={openAddModal}
             className="px-4 py-2 rounded-lg bg-[#eb8a23] hover:bg-[#d97917] text-white font-bold text-xs shadow-sm transition flex items-center gap-1.5"
@@ -158,7 +158,7 @@ export const EmployeesDirectoryView: React.FC = () => {
                 <div className="flex items-center gap-1 bg-blue-50 border border-blue-200 p-1.5 rounded-md text-blue-900 font-black font-mono">
                   <Users className="w-4 h-4 text-blue-500" />
                 </div>
-                {(role === 'manager' || role === 'admin') && (
+                {(role === 'manager' || role === 'admin' || role === 'director') && (
                   <button
                     onClick={() => openEditModal(employee)}
                     className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 transition"
