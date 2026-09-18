@@ -45,12 +45,8 @@ export const INITIAL_DEPARTMENTS = [
 ];
 
 export const INITIAL_LOCATIONS = [
-  'Agra Office - Ground Floor Reception',
-  'Agra Office - 1st Floor Operations Bay',
-  'Agra Office - 2nd Floor Server & Tech Room',
-  'Noida HQ - Wing A Executive Suites',
-  'Noida HQ - Wing B Engineering Hub',
-  'Bengaluru Branch - Koramangala Hub',
+  '410, 4th Floor, Shri Siddhi Vinayak Trade Centre, Agra -282004',
+  '207, 2nd Floor, Padam Business Park, Sikandra Agra - 282007',
 ];
 
 export const INITIAL_APPROVAL_CONFIG: ApprovalConfig = {
