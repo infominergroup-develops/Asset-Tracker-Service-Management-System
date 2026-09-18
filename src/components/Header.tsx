@@ -70,15 +70,15 @@ export const Header: React.FC<HeaderProps> = ({
   const getRoleBadge = (r: UserRole) => {
     switch (r) {
       case 'employee':
-        return { label: 'Employee (No-Login)', icon: <User className="w-3.5 h-3.5" />, color: 'text-amber-300' };
+        return { label: 'Employee', icon: <User className="w-3.5 h-3.5" />, color: 'text-amber-300' };
       case 'manager':
-        return { label: 'Manager (Vikram)', icon: <Briefcase className="w-3.5 h-3.5" />, color: 'text-blue-300' };
+        return { label: 'Manager', icon: <Briefcase className="w-3.5 h-3.5" />, color: 'text-blue-300' };
       case 'director':
-        return { label: 'Director (Anita)', icon: <Shield className="w-3.5 h-3.5" />, color: 'text-purple-300' };
+        return { label: 'Director', icon: <Shield className="w-3.5 h-3.5" />, color: 'text-purple-300' };
       case 'admin':
-        return { label: 'Admin (Rajesh)', icon: <Layers className="w-3.5 h-3.5" />, color: 'text-emerald-300' };
+        return { label: 'Admin', icon: <Layers className="w-3.5 h-3.5" />, color: 'text-emerald-300' };
       case 'vendor':
-        return { label: 'Vendor (ABC Tech)', icon: <Wrench className="w-3.5 h-3.5" />, color: 'text-[#eb8a23]' };
+        return { label: 'Vendor', icon: <Wrench className="w-3.5 h-3.5" />, color: 'text-[#eb8a23]' };
     }
   };
 
