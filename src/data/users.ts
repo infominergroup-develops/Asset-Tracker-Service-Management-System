@@ -1,6 +1,6 @@
 import { UserRole, UserProfile } from '../types';
 
-export const USER_PROFILES: Record<UserRole, UserProfile> = {
+export const USER_PROFILES: Record<string, UserProfile> = {
   employee: {
     id: 'EMP-GUEST',
     name: 'Self-Service Employee',
@@ -14,6 +14,24 @@ export const USER_PROFILES: Record<UserRole, UserProfile> = {
     id: 'MGR-01',
     name: 'Swati Katiyar',
     email: 'swati.katiyar@infominer.in',
+    role: 'manager',
+    password: 'password',
+    department: 'Operations & Service Delivery',
+    designation: 'Operations Manager',
+  },
+  manager2: {
+    id: 'MGR-02',
+    name: 'Arif',
+    email: 'arif@infominer.in',
+    role: 'manager',
+    password: 'password',
+    department: 'Operations & Service Delivery',
+    designation: 'Operations Manager',
+  },
+  manager3: {
+    id: 'MGR-03',
+    name: 'Shavya Agrawal',
+    email: 'shavya.agrawal@infominer.in',
     role: 'manager',
     password: 'password',
     department: 'Operations & Service Delivery',
