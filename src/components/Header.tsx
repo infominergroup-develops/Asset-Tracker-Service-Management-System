@@ -61,8 +61,12 @@ export const Header: React.FC<HeaderProps> = ({
 
   const pendingQuotationsCount = quotations.filter((q) => q.status === 'Submitted').length;
 
-  const unreadNotifications = notifications.filter(
-    (n) => !n.read && (n.targetRoles.includes(role) || n.targetRoles.includes('employee'))
+  const roleNotifications = notifications.filter(
+    (n) => n.targetRoles.includes(role) || n.targetRoles.includes('employee')
+  );
+
+  const unreadNotifications = roleNotifications.filter(
+    (n) => !n.read
   );
 
   // No handleRoleChange anymore
@@ -182,10 +186,10 @@ export const Header: React.FC<HeaderProps> = ({
                   </div>
 
                   <div className="max-h-80 overflow-y-auto divide-y divide-slate-700/60">
-                    {notifications.length === 0 ? (
+                    {roleNotifications.length === 0 ? (
                       <div className="p-6 text-center text-slate-400 text-xs">No notifications right now</div>
                     ) : (
-                      notifications.slice(0, 10).map((item) => (
+                      roleNotifications.slice(0, 10).map((item) => (
                         <div
                           key={item.id}
                           onClick={() => {

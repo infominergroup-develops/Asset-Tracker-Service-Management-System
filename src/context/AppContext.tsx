@@ -1044,11 +1044,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // 15. Notification helpers
   const markNotificationRead = async (id: string) => {
-    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
+    try {
+      await updateDoc(doc(db, "notifications", id), { read: true });
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   const markAllNotificationsRead = async () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+    try {
+      // Create a batch or just loop, for simplicity loop since it's client side and limited
+      const unreadNotifs = notifications.filter(n => !n.read);
+      for (const n of unreadNotifs) {
+        await updateDoc(doc(db, "notifications", n.id), { read: true });
+      }
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   // 14. Employee Management
