@@ -623,7 +623,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     estimatedDays: number;
     pdfUrl?: string;
   }): Promise<void> => {
-    const targetTicket = tickets.find((t) => t.id === data.workOrderId);
+    const targetWo = workOrders.find((w) => w.id === data.workOrderId);
+    if (!targetWo) return;
+    
+    const targetTicket = tickets.find((t) => t.id === targetWo.ticketId);
     if (!targetTicket) return;
 
     const vendor = vendors.find((v) => v.id === targetTicket.assignedVendorId);
@@ -655,6 +658,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     try {
       await setDoc(doc(db, "quotations", qId), newQuotation);
+      
+      // Update the WorkOrder so the vendor sees the state change
+      await updateDoc(doc(db, "workOrders", targetWo.id), {
+        status: 'Quotation Under Review',
+        quotationId: qId,
+        currentQuotationAmount: data.totalAmount
+      });
+
       await updateDoc(doc(db, "tickets", targetTicket.id), {
         status: 'Quotation Under Review',
         quotationId: qId,
@@ -703,6 +714,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       });
 
       const nextTicketStatus = decision === 'Approved' ? 'Approved' : (decision === 'Revision Required' ? 'Quotation Pending' : 'Rejected');
+
+      // Update the WorkOrder so the vendor sees the approval
+      const nextWoStatus = decision === 'Approved' ? 'Quotation Approved' : (decision === 'Revision Required' ? 'Quotation Pending' : 'Assigned');
+      await updateDoc(doc(db, "workOrders", targetQuote.workOrderId), {
+        status: nextWoStatus,
+      });
 
       await updateDoc(doc(db, "tickets", targetTicket.id), {
         status: nextTicketStatus,
