@@ -846,8 +846,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         })
       });
 
-      if (targetTicket.workOrderId) {
-        await updateDoc(doc(db, "workOrders", targetTicket.workOrderId), {
+      // Find corresponding work order for this ticket to close it
+      const targetWo = workOrders.find(w => w.ticketId === ticketId);
+      if (targetWo) {
+        await updateDoc(doc(db, "workOrders", targetWo.id), {
           status: 'Verified & Closed',
         });
       }
