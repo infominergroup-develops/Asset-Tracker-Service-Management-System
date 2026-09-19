@@ -478,7 +478,27 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (!vendor) return;
 
     const now = new Date().toISOString();
+    
+    // Create the Work Order document for the vendor
+    const count = workOrders.length + 10;
+    const woId = `WO-2026-${String(count).padStart(5, '0')}`;
+    
+    const newWorkOrder: WorkOrder = {
+      id: woId,
+      ticketId: targetTicket.id,
+      assetId: targetTicket.assetId,
+      assetName: targetTicket.assetName,
+      vendorId: vendor.id,
+      vendorName: vendor.name,
+      issueSummary: targetTicket.issueCategory,
+      requiredWork: comment || 'Please diagnose and provide a formal quotation for repair/service.',
+      createdAt: now,
+      status: 'Quotation Pending'
+    };
+
     try {
+      await setDoc(doc(db, "workOrders", woId), newWorkOrder);
+      
       await updateDoc(doc(db, "tickets", ticketId), {
         status: 'Quotation Pending',
         assignedVendorId: vendor.id,
