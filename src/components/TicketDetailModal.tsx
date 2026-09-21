@@ -62,7 +62,9 @@ export const TicketDetailModal: React.FC<TicketDetailModalProps> = ({
 
   const canApproveTicket =
     (role === 'manager' || role === 'director' || role === 'admin') &&
-    (ticket.status === 'Submitted' || ticket.status === 'Under Management Review');
+    (ticket.status === 'Submitted' || 
+     ticket.status === 'Under Management Review' || 
+     (role !== 'manager' && ticket.status === 'Pending Director Approval'));
 
   const canReviewQuotation =
     (role === 'manager' || role === 'director' || role === 'admin') &&

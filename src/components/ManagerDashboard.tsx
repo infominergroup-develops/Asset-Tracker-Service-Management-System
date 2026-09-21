@@ -71,7 +71,7 @@ export const ManagerDashboard: React.FC<ManagerDashboardProps> = ({
     if (!matchesSearch) return false;
 
     if (pipelineFilter === 'pending-approvals') {
-      return t.status === 'Submitted' || t.status === 'Under Management Review';
+      return t.status === 'Submitted' || t.status === 'Under Management Review' || t.status === 'Pending Director Approval';
     }
     if (pipelineFilter === 'quotation-review') {
       return t.status === 'Quotation Under Review' || t.status === 'Quotation Pending';
