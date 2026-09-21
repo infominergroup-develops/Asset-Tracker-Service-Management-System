@@ -136,6 +136,7 @@ interface AppContextType {
   markAllNotificationsRead: () => Promise<void>;
   resetToDefaults: () => void;
   resetData: () => void;
+  updateUser: (id: string, updates: Partial<UserProfile>) => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType | null>(null);
@@ -257,6 +258,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       // to avoid signing out the current user. For demo, we just add to Firestore.
       await setDoc(doc(db, "users", user.id), user);
       setUsers(prev => [...prev, user]);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const updateUser = async (id: string, updates: Partial<UserProfile>) => {
+    try {
+      await updateDoc(doc(db, "users", id), updates);
+      setUsers(prev => prev.map(u => u.id === id ? { ...u, ...updates } : u));
     } catch (e) {
       console.error(e);
     }
@@ -1212,6 +1222,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         updateVendor,
         createEmployee,
         updateEmployee,
+        updateUser,
         updateApprovalConfig,
         markNotificationRead,
         markAllNotificationsRead,

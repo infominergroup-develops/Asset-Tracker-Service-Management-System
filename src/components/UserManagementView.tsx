@@ -4,8 +4,9 @@ import { UserRole, UserProfile } from '../types';
 import { Shield, Plus, X, Lock, Mail, User, Briefcase } from 'lucide-react';
 
 export const UserManagementView: React.FC = () => {
-  const { users, addUser } = useApp();
+  const { users, addUser, updateUser } = useApp();
   const [showAddForm, setShowAddForm] = useState(false);
+  const [editingUserId, setEditingUserId] = useState<string | null>(null);
   
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -17,17 +18,27 @@ export const UserManagementView: React.FC = () => {
     e.preventDefault();
     if (!name || !email || !password || !role) return;
 
-    const newUser: UserProfile = {
-      id: `USR-${Date.now()}`,
-      name,
-      email,
-      password,
-      role,
-      designation: designation || undefined,
-    };
-
-    addUser(newUser);
+    if (editingUserId) {
+      updateUser(editingUserId, {
+        name,
+        email,
+        ...(password ? { password } : {}),
+        role,
+        designation: designation || undefined,
+      });
+    } else {
+      const newUser: UserProfile = {
+        id: `USR-${Date.now()}`,
+        name,
+        email,
+        password,
+        role,
+        designation: designation || undefined,
+      };
+      addUser(newUser);
+    }
     setShowAddForm(false);
+    setEditingUserId(null);
     
     // reset
     setName('');
@@ -60,7 +71,15 @@ export const UserManagementView: React.FC = () => {
           </p>
         </div>
         <button
-          onClick={() => setShowAddForm(true)}
+          onClick={() => {
+            setEditingUserId(null);
+            setName('');
+            setEmail('');
+            setPassword('');
+            setRole('manager');
+            setDesignation('');
+            setShowAddForm(true);
+          }}
           className="bg-[#eb8a23] hover:bg-[#d97917] text-white px-4 py-2 rounded-lg font-medium shadow-xs transition flex items-center justify-center gap-2"
         >
           <Plus className="w-4 h-4" />
@@ -95,7 +114,20 @@ export const UserManagementView: React.FC = () => {
                     {user.designation || '-'}
                   </td>
                   <td className="px-6 py-4 text-right">
-                    <button className="text-sm text-blue-600 hover:text-blue-800 font-medium">Edit</button>
+                    <button 
+                      onClick={() => {
+                        setEditingUserId(user.id);
+                        setName(user.name);
+                        setEmail(user.email);
+                        setPassword('');
+                        setRole(user.role);
+                        setDesignation(user.designation || '');
+                        setShowAddForm(true);
+                      }}
+                      className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+                    >
+                      Edit
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -108,7 +140,7 @@ export const UserManagementView: React.FC = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-              <h3 className="text-lg font-bold text-slate-900">Create New Login</h3>
+              <h3 className="text-lg font-bold text-slate-900">{editingUserId ? 'Edit User' : 'Create New Login'}</h3>
               <button
                 onClick={() => setShowAddForm(false)}
                 className="p-2 rounded-full hover:bg-slate-100 text-slate-500 transition"
@@ -162,11 +194,11 @@ export const UserManagementView: React.FC = () => {
                       </div>
                       <input
                         type="text"
-                        required
+                        required={!editingUserId}
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         className="w-full pl-10 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-hidden focus:ring-2 focus:ring-[#eb8a23]/50 focus:border-[#eb8a23] transition"
-                        placeholder="Set a password"
+                        placeholder={editingUserId ? "Leave blank to keep unchanged" : "Set a password"}
                       />
                     </div>
                   </div>
@@ -213,7 +245,7 @@ export const UserManagementView: React.FC = () => {
                     type="submit"
                     className="px-4 py-2 rounded-lg font-medium bg-[#eb8a23] text-white hover:bg-[#d97917] transition shadow-xs text-sm"
                   >
-                    Create User
+                    {editingUserId ? 'Save Changes' : 'Create User'}
                   </button>
                 </div>
               </form>
