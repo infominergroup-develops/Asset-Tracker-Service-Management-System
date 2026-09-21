@@ -402,20 +402,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       comment?: string;
     }
   ) => {
-    const newLog: AuditLog = {
+    const newLog: any = {
       id: `AUD-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
       timestamp: new Date().toISOString(),
-      ticketId: options?.ticketId,
-      assetId: options?.assetId,
       user: currentUser.name,
       role: currentUser.role.toUpperCase(),
       action,
       entityAffected,
-      oldValue: options?.oldValue,
-      newValue: options?.newValue,
-      comment: options?.comment,
       ipAddress: '192.168.1.' + Math.floor(Math.random() * 200 + 10),
     };
+    if (options?.ticketId !== undefined) newLog.ticketId = options.ticketId;
+    if (options?.assetId !== undefined) newLog.assetId = options.assetId;
+    if (options?.oldValue !== undefined) newLog.oldValue = options.oldValue;
+    if (options?.newValue !== undefined) newLog.newValue = options.newValue;
+    if (options?.comment !== undefined) newLog.comment = options.comment;
+
     try { await setDoc(doc(db, "auditLogs", newLog.id), newLog); } catch(e) { console.error(e); }
   };
 
