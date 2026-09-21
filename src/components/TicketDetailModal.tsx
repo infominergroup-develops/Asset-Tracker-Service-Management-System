@@ -18,6 +18,7 @@ import {
   RotateCcw,
   ExternalLink,
   ChevronRight,
+  Trash2,
 } from 'lucide-react';
 
 interface TicketDetailModalProps {
@@ -45,6 +46,7 @@ export const TicketDetailModal: React.FC<TicketDetailModalProps> = ({
     verifyAndClose,
     sendBackToVendor,
     approvalConfig,
+    deleteTicket,
   } = useApp();
 
   // Action states
@@ -179,6 +181,19 @@ export const TicketDetailModal: React.FC<TicketDetailModalProps> = ({
             >
               {ticket.status}
             </span>
+            {(role === 'admin' || role === 'director' || role === 'manager') && (
+              <button
+                onClick={async () => {
+                  if (window.confirm("Are you sure you want to permanently delete this ticket?")) {
+                    await deleteTicket(ticket.id);
+                    onClose();
+                  }
+                }}
+                className="p-1 rounded-md text-slate-300 hover:text-white hover:bg-red-600 transition flex items-center gap-1 text-xs px-2"
+              >
+                <Trash2 className="w-4 h-4" /> Delete
+              </button>
+            )}
             <button
               onClick={onClose}
               className="p-1 rounded-md text-slate-300 hover:text-white hover:bg-slate-700 transition"

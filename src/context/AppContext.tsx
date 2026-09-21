@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { initializeApp } from "firebase/app";
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword, getAuth } from "firebase/auth";
-import { collection, onSnapshot, addDoc, getDocs, doc, setDoc, query, orderBy, limit, updateDoc, arrayUnion } from "firebase/firestore";
+import { collection, onSnapshot, addDoc, getDocs, doc, setDoc, query, orderBy, limit, updateDoc, arrayUnion, deleteDoc } from "firebase/firestore";
 import { auth, db, firebaseConfig } from '../config/firebase';
 import {
   Asset,
@@ -79,7 +79,9 @@ interface AppContextType {
 
   approveTicket: (ticketId: string, vendorId: string, comment?: string) => Promise<void>;
   rejectTicket: (ticketId: string, reason: string) => Promise<void>;
-  requestClarification: (ticketId: string, note: string) => Promise<void>;
+  clarifyTicket: (ticketId: string, clarificationNote: string) => Promise<void>;
+  closeTicket: (ticketId: string, closureNote: string) => Promise<void>;
+  deleteTicket: (id: string) => Promise<void>;
   addInternalComment: (ticketId: string, comment: string) => Promise<void>;
   
   submitQuotation: (data: {
@@ -125,6 +127,7 @@ interface AppContextType {
   createAsset: (asset: Omit<Asset, 'id' | 'createdAt' | 'updatedAt'>) => Promise<string>;
   updateAsset: (id: string, updates: Partial<Asset>) => Promise<void>;
   deactivateAsset: (id: string, reason: string) => Promise<void>;
+  deleteAsset: (id: string) => Promise<void>;
 
   createVendor: (vendor: Omit<Vendor, 'id' | 'completedJobsCount' | 'rating' | 'averageTurnaroundDays'>) => Promise<string>;
   updateVendor: (id: string, updates: Partial<Vendor>) => Promise<void>;
@@ -668,7 +671,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   // 4. Request Clarification
-  const requestClarification = async (ticketId: string, note: string): Promise<void> => {
+  const clarifyTicket = async (ticketId: string, clarificationNote: string): Promise<void> => {
     const targetTicket = tickets.find((t) => t.id === ticketId);
     if (!targetTicket) return;
 
@@ -676,6 +679,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     try {
       await updateDoc(doc(db, "tickets", ticketId), {
         status: 'Clarification Required',
+        clarificationNote,
         updatedAt: now,
         timeline: arrayUnion({
           id: `TL-${Date.now()}`,
@@ -683,20 +687,63 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           action: 'Clarification Requested',
           user: currentUser.name,
           role: currentUser.role,
-          comment: note,
+          comment: clarificationNote,
           newStatus: 'Clarification Required',
         })
       });
 
       pushNotification(
         `Clarification Needed (${ticketId})`,
-        `Manager requested more info: ${note}`,
+        `Manager requested more info: ${clarificationNote}`,
         ['employee', 'admin'],
         'warning',
         { ticketId }
       );
-      addAudit('TICKET_CLARIFICATION_REQUESTED', `Ticket ${ticketId}`, { ticketId, comment: note });
+      addAudit('TICKET_CLARIFICATION_REQUESTED', `Ticket ${ticketId}`, { ticketId, comment: clarificationNote });
     } catch (e) { console.error(e); }
+  };
+
+  const closeTicket = async (ticketId: string, closureNote: string): Promise<void> => {
+    const targetTicket = tickets.find((t) => t.id === ticketId);
+    if (!targetTicket) return;
+
+    const now = new Date().toISOString();
+    try {
+      await updateDoc(doc(db, "tickets", ticketId), {
+        status: 'Closed',
+        closureNote,
+        resolvedAt: now,
+        updatedAt: now,
+        timeline: arrayUnion({
+          id: `TL-${Date.now()}`,
+          timestamp: now,
+          action: 'Ticket Closed',
+          user: currentUser.name,
+          role: currentUser.role,
+          comment: `Ticket closed. Note: ${closureNote}`,
+          newStatus: 'Closed',
+        })
+      });
+
+      pushNotification(
+        `Ticket Closed (${ticketId})`,
+        `The ticket has been successfully closed.`,
+        ['manager', 'director'],
+        'success',
+        { ticketId }
+      );
+      addAudit('TICKET_CLOSED', `Ticket ${ticketId}`, { ticketId, comment: closureNote });
+    } catch(e) { console.error(e); }
+  };
+
+  const deleteTicket = async (id: string): Promise<void> => {
+    try {
+      await deleteDoc(doc(db, "tickets", id));
+      addAudit('TICKET_DELETED', `Ticket ${id}`, { ticketId: id });
+    } catch(e) {
+      console.error("Error deleting ticket:", e);
+      throw e;
+    }
   };
 
   // 5. Add Internal Comment
@@ -1110,6 +1157,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
+  const deleteAsset = async (id: string): Promise<void> => {
+    try {
+      await deleteDoc(doc(db, "assets", id));
+      addAudit('ASSET_DELETED', `Asset ${id}`, { assetId: id });
+    } catch (e) {
+      console.error("Error deleting asset:", e);
+      throw e;
+    }
+  };
+
   // 13. Vendor Management
   const createVendor = async (vendorData: Omit<Vendor, 'id' | 'completedJobsCount' | 'rating' | 'averageTurnaroundDays'>): Promise<string> => {
     const newId = `VND-${String(vendors.length + 1).padStart(3, '0')}`;
@@ -1239,7 +1296,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         createTicket,
         approveTicket,
         rejectTicket,
-        requestClarification,
+        clarifyTicket,
+        closeTicket,
+        deleteTicket,
         addInternalComment,
         submitQuotation,
         reviewQuotation,
@@ -1250,6 +1309,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         createAsset,
         updateAsset,
         deactivateAsset,
+        deleteAsset,
         createVendor,
         updateVendor,
         createEmployee,

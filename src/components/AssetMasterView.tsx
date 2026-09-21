@@ -19,6 +19,8 @@ import {
   FileText,
   Clock,
   ShieldCheck,
+  FileSpreadsheet,
+  Trash2,
 } from 'lucide-react';
 
 interface AssetMasterViewProps {
@@ -30,7 +32,7 @@ export const AssetMasterView: React.FC<AssetMasterViewProps> = ({
   initialSelectedAssetId,
   onRaiseTicketForAsset,
 }) => {
-  const { assets, tickets, vendors, entities, departments, locations, employees, createAsset, updateAsset, createVendor, createEmployee, role } = useApp();
+  const { assets, tickets, vendors, entities, departments, locations, employees, createAsset, updateAsset, createVendor, createEmployee, role, deleteAsset } = useApp();
 
   const [selectedAssetId, setSelectedAssetId] = useState<string | null>(initialSelectedAssetId || null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -196,6 +198,19 @@ export const AssetMasterView: React.FC<AssetMasterViewProps> = ({
             <ArrowLeft className="w-4 h-4" /> Back to Asset Master
           </button>
           <div className="flex items-center gap-2">
+            {(role === 'admin' || role === 'director' || role === 'manager') && (
+              <button
+                onClick={async () => {
+                  if (window.confirm("Are you sure you want to permanently delete this asset?")) {
+                    await deleteAsset(selectedAsset.id);
+                    setSelectedAssetId(null);
+                  }
+                }}
+                className="px-3.5 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition shadow-xs flex items-center gap-1.5"
+              >
+                <Trash2 className="w-3.5 h-3.5" /> Delete Asset
+              </button>
+            )}
             {onRaiseTicketForAsset && (
               <button
                 onClick={() => onRaiseTicketForAsset(selectedAsset)}
