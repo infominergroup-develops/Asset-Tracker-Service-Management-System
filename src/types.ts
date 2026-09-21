@@ -261,6 +261,8 @@ export interface NotificationItem {
   targetRoles: UserRole[];
   ticketId?: string;
   workOrderId?: string;
+  assetId?: string;
+  quotationId?: string;
 }
 
 export interface AuditLog {
