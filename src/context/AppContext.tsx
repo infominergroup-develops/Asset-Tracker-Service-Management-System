@@ -1,7 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
-import { onAuthStateChanged, signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword } from "firebase/auth";
+import { initializeApp } from "firebase/app";
+import { onAuthStateChanged, signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword, getAuth } from "firebase/auth";
 import { collection, onSnapshot, addDoc, getDocs, doc, setDoc, query, orderBy, limit, updateDoc, arrayUnion } from "firebase/firestore";
-import { auth, db } from '../config/firebase';
+import { auth, db, firebaseConfig } from '../config/firebase';
 import {
   Asset,
   Vendor,
@@ -229,19 +230,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setActiveTab('dashboard');
       return null;
     } catch (error: any) {
-      if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found') {
-        try {
-          console.log("User not found or invalid credential, attempting to auto-register...");
-          await createUserWithEmailAndPassword(auth, email, password);
-          setActiveTab('dashboard');
-          return null;
-        } catch (regError: any) {
-          console.error("Auto-registration failed:", regError);
-          if (regError.code === 'auth/email-already-in-use') {
-            return "Incorrect password for this existing account.";
-          }
-          return regError.message || "Failed to register user.";
-        }
+      if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+        return "Invalid email or password. Please try again.";
       }
       return error.message || "Login failed.";
     }
@@ -254,12 +244,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   
   const addUser = async (user: UserProfile) => {
     try {
-      // In a real app, this should be done via Firebase Admin SDK in a Cloud Function
-      // to avoid signing out the current user. For demo, we just add to Firestore.
+      if (currentUser.role !== 'director' && currentUser.role !== 'admin') {
+         throw new Error('Unauthorized. Only directors can create users.');
+      }
+      // Use a secondary Firebase app to create the user without logging out the current Director session
+      const secondaryApp = initializeApp(firebaseConfig, `SecondaryApp-${Date.now()}`);
+      const secondaryAuth = getAuth(secondaryApp);
+      
+      // Default password for new users created by director
+      await createUserWithEmailAndPassword(secondaryAuth, user.email, user.password || 'password123');
+
+      // Add to Firestore
       await setDoc(doc(db, "users", user.id), user);
       setUsers(prev => [...prev, user]);
     } catch (e) {
       console.error(e);
+      throw e;
     }
   };
 

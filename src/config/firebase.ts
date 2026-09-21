@@ -3,7 +3,7 @@ import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 // import { getAnalytics } from "firebase/analytics";
 
-const firebaseConfig = {
+export const firebaseConfig = {
   apiKey: "AIzaSyAirzIM3nGR7qLvF3cEZ3POhBgWFInA5iQ",
   authDomain: "assettracker-fc1c8.firebaseapp.com",
   databaseURL: "https://assettracker-fc1c8-default-rtdb.firebaseio.com",
