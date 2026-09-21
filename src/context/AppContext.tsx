@@ -159,7 +159,26 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [users, setUsers] = useState<UserProfile[]>(Object.values(USER_PROFILES));
   const [currentUserId, setCurrentUserId] = useState<string>('EMP-GUEST');
-  const [activeTab, setActiveTab] = useState<string>('dashboard');
+  const [activeTab, setActiveTabState] = useState<string>(() => {
+    return window.location.hash ? window.location.hash.slice(1) : 'dashboard';
+  });
+
+  const setActiveTab = (tab: string) => {
+    window.location.hash = tab;
+  };
+
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.slice(1);
+      if (hash) {
+        setActiveTabState(hash);
+      } else {
+        setActiveTabState('dashboard');
+      }
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
 
   useEffect(() => {
     // Load users from Firestore
