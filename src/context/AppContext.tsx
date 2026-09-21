@@ -266,6 +266,54 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [approvalConfig, setApprovalConfig] = useState<ApprovalConfig>(INITIAL_APPROVAL_CONFIG);
 
+  const hasCheckedExpiries = React.useRef(false);
+
+  useEffect(() => {
+    if (!isAuthenticated || !['admin', 'manager', 'director'].includes(role) || hasCheckedExpiries.current || assets.length === 0 || notifications.length === 0) return;
+    
+    hasCheckedExpiries.current = true;
+    const now = new Date();
+    const thirtyDaysFromNow = new Date();
+    thirtyDaysFromNow.setDate(now.getDate() + 30);
+
+    assets.forEach((ast) => {
+      if (ast.category === 'IT Equipment' && ['Laptop', 'Computer', 'Desktop'].includes(ast.type)) {
+        // Software
+        if (ast.softwareExpiry) {
+          const expDate = new Date(ast.softwareExpiry);
+          if (expDate <= thirtyDaysFromNow && expDate >= now) {
+            const exists = notifications.some(n => n.assetId === ast.id && n.title.includes('Software Expiring'));
+            if (!exists) {
+              pushNotification(
+                `Software Expiring: ${ast.name}`,
+                `The software license (${ast.softwareName || 'Unknown'}) on ${ast.id} expires on ${ast.softwareExpiry}.`,
+                ['admin', 'manager', 'director'],
+                'warning',
+                { assetId: ast.id }
+              );
+            }
+          }
+        }
+        // Antivirus
+        if (ast.antivirusExpiry) {
+          const expDate = new Date(ast.antivirusExpiry);
+          if (expDate <= thirtyDaysFromNow && expDate >= now) {
+            const exists = notifications.some(n => n.assetId === ast.id && n.title.includes('Antivirus Expiring'));
+            if (!exists) {
+              pushNotification(
+                `Antivirus Expiring: ${ast.name}`,
+                `The antivirus subscription (${ast.antivirusName || 'Unknown'}) on ${ast.id} expires on ${ast.antivirusExpiry}.`,
+                ['admin', 'manager', 'director'],
+                'warning',
+                { assetId: ast.id }
+              );
+            }
+          }
+        }
+      }
+    });
+  }, [assets, isAuthenticated, role, notifications]);
+
   useEffect(() => {
     const unsubEmployees = onSnapshot(collection(db, "employees"), (snap) => {
       setEmployees(snap.docs.map(doc => ({ ...doc.data(), id: doc.id } as Employee)));

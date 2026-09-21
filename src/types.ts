@@ -73,6 +73,14 @@ export interface Asset {
   createdAt: string;
   updatedAt: string;
   replacedByAssetId?: string;
+  
+  // Software & Antivirus Tracking (for IT Equipment)
+  softwareName?: string;
+  softwareKey?: string;
+  softwareExpiry?: string;
+  antivirusName?: string;
+  antivirusKey?: string;
+  antivirusExpiry?: string;
 }
 
 export type TicketPriority = 'Low' | 'Medium' | 'High' | 'Critical';

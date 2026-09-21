@@ -59,6 +59,14 @@ export const AssetMasterView: React.FC<AssetMasterViewProps> = ({
   const [newStatus, setNewStatus] = useState<AssetStatus>('Active');
   const [newNotes, setNewNotes] = useState('');
 
+  // Software & Antivirus
+  const [newSoftwareName, setNewSoftwareName] = useState('');
+  const [newSoftwareKey, setNewSoftwareKey] = useState('');
+  const [newSoftwareExpiry, setNewSoftwareExpiry] = useState('');
+  const [newAntivirusName, setNewAntivirusName] = useState('');
+  const [newAntivirusKey, setNewAntivirusKey] = useState('');
+  const [newAntivirusExpiry, setNewAntivirusExpiry] = useState('');
+
   // Filtered Assets
   const filteredAssets = assets.filter((a) => {
     const matchesSearch =
@@ -141,6 +149,12 @@ export const AssetMasterView: React.FC<AssetMasterViewProps> = ({
       condition: newCondition,
       status: newStatus,
       notes: newNotes,
+      softwareName: newSoftwareName,
+      softwareKey: newSoftwareKey,
+      softwareExpiry: newSoftwareExpiry,
+      antivirusName: newAntivirusName,
+      antivirusKey: newAntivirusKey,
+      antivirusExpiry: newAntivirusExpiry,
     });
 
     setShowCreateModal(false);
@@ -288,6 +302,39 @@ export const AssetMasterView: React.FC<AssetMasterViewProps> = ({
                 <p className="text-slate-600 bg-slate-50 p-2 rounded border border-slate-100 mt-0.5">
                   {selectedAsset.notes}
                 </p>
+              </div>
+            )}
+            
+            {/* Display Software/Antivirus Details if available */}
+            {(selectedAsset.softwareName || selectedAsset.antivirusName) && (
+              <div className="pt-3 mt-3 border-t border-slate-100 space-y-2">
+                <h4 className="font-bold text-[11px] text-[#2d3e50] uppercase tracking-wide">Software & Antivirus</h4>
+                {selectedAsset.softwareName && (
+                  <div className="grid grid-cols-2 gap-2 bg-slate-50 p-2 rounded border border-slate-100">
+                    <div>
+                      <span className="text-slate-400 block text-[10px]">Software</span>
+                      <span className="font-semibold text-slate-800">{selectedAsset.softwareName}</span>
+                      {selectedAsset.softwareKey && <div className="text-[10px] text-slate-500 font-mono mt-0.5 break-all">{selectedAsset.softwareKey}</div>}
+                    </div>
+                    <div>
+                      <span className="text-slate-400 block text-[10px]">Expiry Date</span>
+                      <span className="font-semibold text-rose-600">{selectedAsset.softwareExpiry || 'N/A'}</span>
+                    </div>
+                  </div>
+                )}
+                {selectedAsset.antivirusName && (
+                  <div className="grid grid-cols-2 gap-2 bg-slate-50 p-2 rounded border border-slate-100">
+                    <div>
+                      <span className="text-slate-400 block text-[10px]">Antivirus</span>
+                      <span className="font-semibold text-slate-800">{selectedAsset.antivirusName}</span>
+                      {selectedAsset.antivirusKey && <div className="text-[10px] text-slate-500 font-mono mt-0.5 break-all">{selectedAsset.antivirusKey}</div>}
+                    </div>
+                    <div>
+                      <span className="text-slate-400 block text-[10px]">Expiry Date</span>
+                      <span className="font-semibold text-rose-600">{selectedAsset.antivirusExpiry || 'N/A'}</span>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -571,6 +618,17 @@ export const AssetMasterView: React.FC<AssetMasterViewProps> = ({
                 </div>
 
                 <div>
+                  <label className="block font-semibold text-slate-700 mb-1">Asset Type</label>
+                  <input
+                    type="text"
+                    required
+                    value={newType}
+                    onChange={(e) => setNewType(e.target.value)}
+                    placeholder="e.g. Laptop, Server, Chair"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+                  />
+                </div>
+                <div>
                   <label className="block font-semibold text-slate-700 mb-1">Brand</label>
                   <input
                     type="text"
@@ -650,6 +708,44 @@ export const AssetMasterView: React.FC<AssetMasterViewProps> = ({
                   </select>
                 </div>
               </div>
+
+              {newCategory === 'IT Equipment' && ['Laptop', 'Computer', 'Desktop'].includes(newType) && (
+                <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-4">
+                  <h4 className="font-bold text-sm text-[#2d3e50] border-b border-slate-200 pb-2 flex items-center gap-2">
+                    <ShieldCheck className="w-4 h-4 text-[#eb8a23]" /> Software & Antivirus Details
+                  </h4>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block font-semibold text-slate-700 mb-1">Software Name</label>
+                      <input type="text" value={newSoftwareName} onChange={(e) => setNewSoftwareName(e.target.value)} placeholder="e.g. MS Office" className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white" />
+                    </div>
+                    <div>
+                      <label className="block font-semibold text-slate-700 mb-1">License Key</label>
+                      <input type="text" value={newSoftwareKey} onChange={(e) => setNewSoftwareKey(e.target.value)} placeholder="XXXXX-XXXXX-XXXXX" className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white font-mono" />
+                    </div>
+                    <div>
+                      <label className="block font-semibold text-slate-700 mb-1">Expiry Date</label>
+                      <input type="date" value={newSoftwareExpiry} onChange={(e) => setNewSoftwareExpiry(e.target.value)} className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white" />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block font-semibold text-slate-700 mb-1">Antivirus Name</label>
+                      <input type="text" value={newAntivirusName} onChange={(e) => setNewAntivirusName(e.target.value)} placeholder="e.g. Norton" className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white" />
+                    </div>
+                    <div>
+                      <label className="block font-semibold text-slate-700 mb-1">License Key</label>
+                      <input type="text" value={newAntivirusKey} onChange={(e) => setNewAntivirusKey(e.target.value)} placeholder="XXXXX-XXXXX-XXXXX" className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white font-mono" />
+                    </div>
+                    <div>
+                      <label className="block font-semibold text-slate-700 mb-1">Expiry Date</label>
+                      <input type="date" value={newAntivirusExpiry} onChange={(e) => setNewAntivirusExpiry(e.target.value)} className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white" />
+                    </div>
+                  </div>
+                </div>
+              )}
 
               <div>
                 <label className="block font-semibold text-slate-700 mb-1">Operational Notes</label>
