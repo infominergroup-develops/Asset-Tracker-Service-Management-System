@@ -160,8 +160,12 @@ export const EmployeesDirectoryView: React.FC = () => {
                 </div>
                 {(role === 'manager' || role === 'admin' || role === 'director') && (
                   <button
-                    onClick={() => openEditModal(employee)}
-                    className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 transition"
+                    type="button"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      openEditModal(employee);
+                    }}
+                    className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 transition relative z-10"
                     title="Edit Employee"
                   >
                     <Edit2 className="w-4 h-4" />

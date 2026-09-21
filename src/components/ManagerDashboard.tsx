@@ -43,7 +43,11 @@ export const ManagerDashboard: React.FC<ManagerDashboardProps> = ({
 
   const openTickets = tickets.filter((t) => t.status !== 'Closed' && t.status !== 'Rejected');
   const pendingApprovals = tickets.filter(
-    (t) => t.status === 'Submitted' || t.status === 'Under Management Review'
+    (t) =>
+      t.status === 'Submitted' ||
+      t.status === 'Under Management Review' ||
+      t.status === 'Verification Pending' ||
+      t.status === 'Quotation Under Review'
   );
   const pendingQuotations = quotations.filter((q) => q.status === 'Submitted');
   const workInProgress = workOrders.filter(
