@@ -62,22 +62,19 @@ export const QuotationsListView: React.FC<QuotationsListViewProps> = ({ onSelect
     e.preventDefault();
     if (!reviewingQuote) return;
 
-    // Check threshold rules:
-    // If threshold enabled and amount > threshold (e.g. ₹10,000)
-    // and user is manager (not director/admin), require override or block
-    const isAboveThreshold = reviewingQuote.totalAmount > approvalConfig.managerMaxThreshold;
+    let finalDecision: 'Approved' | 'Revision Required' | 'Rejected' | 'Pending Director Approval' = decision as any;
 
-    if (
-      approvalConfig.directorRequiredAbove &&
-      isAboveThreshold &&
-      role === 'manager' &&
-      decision === 'Approved'
-    ) {
-      if (!overrideNotes.trim()) {
-        setErrorMessage(
-          `This quote of ₹${reviewingQuote.totalAmount.toLocaleString()} exceeds the ₹${approvalConfig.managerMaxThreshold.toLocaleString()} Manager Approval Limit. Director approval or mandatory Manager Budget Override justification is required.`
-        );
-        return;
+    // Check threshold rules OR standard manager approval routing
+    if (role === 'manager' && decision === 'Approved') {
+      const isAboveThreshold = reviewingQuote.totalAmount > approvalConfig.managerMaxThreshold;
+      if (approvalConfig.directorRequiredAbove && isAboveThreshold) {
+        // Enforce override note if bypassing or send to director
+        if (!overrideNotes.trim()) {
+           finalDecision = 'Pending Director Approval';
+        }
+      } else {
+        // ALWAYS send to Director to fulfill "manager AND director" rule
+        finalDecision = 'Pending Director Approval';
       }
     }
 
@@ -90,7 +87,7 @@ export const QuotationsListView: React.FC<QuotationsListViewProps> = ({ onSelect
       ? `[BUDGET OVERRIDE: ${overrideNotes.trim()}] ${reviewNotes}`
       : reviewNotes;
 
-    reviewQuotation(reviewingQuote.id, decision, finalNotes || 'Approved by management.');
+    reviewQuotation(reviewingQuote.id, finalDecision, finalNotes || (finalDecision === 'Pending Director Approval' ? 'Manager Approved. Awaiting Director.' : 'Approved by management.'));
     setReviewingQuote(null);
   };
 
@@ -208,7 +205,7 @@ export const QuotationsListView: React.FC<QuotationsListViewProps> = ({ onSelect
                       <td className="px-4 py-3 text-right">
                         <div className="flex items-center justify-end gap-2">
                           {(role === 'manager' || role === 'director' || role === 'admin') &&
-                            q.status === 'Submitted' && (
+                            (q.status === 'Submitted' || (role !== 'manager' && q.status === 'Pending Director Approval')) && (
                               <button
                                 onClick={() => handleOpenReview(q)}
                                 className="px-3 py-1 bg-[#eb8a23] hover:bg-[#d97917] text-white font-bold rounded shadow-2xs text-[11px] transition"

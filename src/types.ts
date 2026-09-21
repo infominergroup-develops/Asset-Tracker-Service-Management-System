@@ -193,7 +193,7 @@ export interface Quotation {
   totalAmount: number;
   estimatedDays: number;
   pdfUrl?: string;
-  status: 'Submitted' | 'Under Review' | 'Approved' | 'Revision Required' | 'Rejected';
+  status: 'Submitted' | 'Under Review' | 'Approved' | 'Revision Required' | 'Rejected' | 'Pending Director Approval';
   submittedAt: string;
   reviewedBy?: string;
   reviewedAt?: string;

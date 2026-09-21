@@ -96,7 +96,7 @@ interface AppContextType {
 
   reviewQuotation: (
     quotationId: string,
-    decision: 'Approved' | 'Revision Required' | 'Rejected',
+    decision: 'Approved' | 'Revision Required' | 'Rejected' | 'Pending Director Approval',
     comment: string
   ) => Promise<void>;
 
@@ -772,7 +772,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // 7. Review Quotation (Manager / Director)
   const reviewQuotation = async (
     quotationId: string,
-    decision: 'Approved' | 'Revision Required' | 'Rejected',
+    decision: 'Approved' | 'Revision Required' | 'Rejected' | 'Pending Director Approval',
     comment: string
   ): Promise<void> => {
     const targetQuote = quotations.find((q) => q.id === quotationId);
@@ -790,10 +790,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         comments: comment,
       });
 
-      const nextTicketStatus = decision === 'Approved' ? 'Approved' : (decision === 'Revision Required' ? 'Quotation Pending' : 'Rejected');
+      const nextTicketStatus = decision === 'Approved' ? 'Approved' : (decision === 'Revision Required' ? 'Quotation Pending' : (decision === 'Pending Director Approval' ? 'Quotation Under Review' : 'Rejected'));
 
       // Update the WorkOrder so the vendor sees the approval
-      const nextWoStatus = decision === 'Approved' ? 'Quotation Approved' : (decision === 'Revision Required' ? 'Quotation Pending' : 'Assigned');
+      const nextWoStatus = decision === 'Approved' ? 'Quotation Approved' : (decision === 'Revision Required' ? 'Quotation Pending' : (decision === 'Pending Director Approval' ? 'Quotation Under Review' : 'Assigned'));
       await updateDoc(doc(db, "workOrders", targetQuote.workOrderId), {
         status: nextWoStatus,
       });

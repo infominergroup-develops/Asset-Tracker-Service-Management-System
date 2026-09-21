@@ -66,7 +66,8 @@ export const TicketDetailModal: React.FC<TicketDetailModalProps> = ({
 
   const canReviewQuotation =
     (role === 'manager' || role === 'director' || role === 'admin') &&
-    (ticket.status === 'Quotation Under Review' || (linkedQuotation && linkedQuotation.status === 'Submitted'));
+    (ticket.status === 'Quotation Under Review' || ticket.status === 'Under Management Review') &&
+    (role !== 'manager' || linkedQuotation?.status !== 'Pending Director Approval');
 
   const canVerifyCompletion =
     (role === 'manager' || role === 'director' || role === 'admin') &&
@@ -108,11 +109,30 @@ export const TicketDetailModal: React.FC<TicketDetailModalProps> = ({
 
   const handleReviewQuotation = () => {
     if (!linkedQuotation) return;
-    if (quotationDecision !== 'Approved' && !actionComment.trim()) {
+    
+    let finalDecision: 'Approved' | 'Revision Required' | 'Rejected' | 'Pending Director Approval' = quotationDecision as any;
+
+    if (role === 'manager' && quotationDecision === 'Approved') {
+      const isAboveThreshold = linkedQuotation.totalAmount > approvalConfig.managerMaxThreshold;
+      if (approvalConfig.directorRequiredAbove && isAboveThreshold) {
+        if (!actionComment.trim()) {
+           finalDecision = 'Pending Director Approval';
+        }
+      } else {
+        finalDecision = 'Pending Director Approval';
+      }
+    }
+
+    if (finalDecision !== 'Approved' && finalDecision !== 'Pending Director Approval' && !actionComment.trim()) {
       setActionError('Please provide a comment/reason for rejection or revision.');
       return;
     }
-    reviewQuotation(linkedQuotation.id, quotationDecision, actionComment || 'Quotation approved.');
+
+    const finalNotes = actionComment.trim()
+      ? actionComment
+      : (finalDecision === 'Pending Director Approval' ? 'Manager Approved. Awaiting Director.' : 'Quotation approved.');
+
+    reviewQuotation(linkedQuotation.id, finalDecision, finalNotes);
     setActiveAction('none');
   };
 

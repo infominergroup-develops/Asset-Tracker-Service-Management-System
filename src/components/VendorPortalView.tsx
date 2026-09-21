@@ -30,10 +30,15 @@ export const VendorPortalView: React.FC<VendorPortalViewProps> = ({ onSelectTick
     submitQuotation,
     updateWorkProgress,
     completeWork,
+    currentUser,
   } = useApp();
 
   // Selected vendor context (if logged in as vendor or previewing as admin)
-  const [selectedVendorId, setSelectedVendorId] = useState<string>(vendors[0]?.id || 'VND-001');
+  const [selectedVendorId, setSelectedVendorId] = useState<string>(
+    role === 'vendor' && currentUser?.vendorId 
+      ? currentUser.vendorId 
+      : vendors[0]?.id || 'VND-001'
+  );
 
   // Modal states for vendor actions
   const [activeWorkOrderForQuote, setActiveWorkOrderForQuote] = useState<WorkOrder | null>(null);
@@ -59,10 +64,10 @@ export const VendorPortalView: React.FC<VendorPortalViewProps> = ({ onSelectTick
 
   // Status breakdown
   const pendingQuotes = vendorWorkOrders.filter(
-    (w) => w.status === 'Assigned' || w.status === 'Quotation Pending'
+    (w) => w.status === 'Assigned' || w.status === 'Quotation Pending' || w.status === 'Quotation Under Review' || w.status === 'Quotation Revision Required'
   );
   const inProgress = vendorWorkOrders.filter(
-    (w) => w.status === 'Work Scheduled' || w.status === 'Work In Progress' || w.status === 'Awaiting Parts'
+    (w) => w.status === 'Quotation Approved' || w.status === 'Work Scheduled' || w.status === 'Work In Progress' || w.status === 'Awaiting Parts'
   );
   const completedPendingSignoff = vendorWorkOrders.filter(
     (w) => w.status === 'Work Completed'
