@@ -353,7 +353,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const unsubTickets = onSnapshot(query(collection(db, "tickets"), orderBy("createdAt", "desc")), (snap) => {
       setTickets(snap.docs.map(doc => ({ ...doc.data(), id: doc.id } as Ticket)));
     });
-    const unsubQuotations = onSnapshot(query(collection(db, "quotations"), orderBy("createdAt", "desc")), (snap) => {
+    const unsubQuotations = onSnapshot(query(collection(db, "quotations"), orderBy("date", "desc")), (snap) => {
       setQuotations(snap.docs.map(doc => ({ ...doc.data(), id: doc.id } as Quotation)));
     });
     const unsubWorkOrders = onSnapshot(query(collection(db, "workOrders"), orderBy("createdAt", "desc")), (snap) => {
@@ -555,8 +555,39 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (!vendor) return;
 
     const now = new Date().toISOString();
-    
-    // Create the Work Order document for the vendor
+
+    // If manager is approving, and it's not already pending director, send to director first
+    if (currentUser.role === 'manager' && targetTicket.status !== 'Pending Director Approval') {
+      try {
+        await updateDoc(doc(db, "tickets", ticketId), {
+          status: 'Pending Director Approval',
+          assignedVendorId: vendor.id,
+          assignedVendorName: vendor.name,
+          updatedAt: now,
+          timeline: arrayUnion({
+            id: `TL-${Date.now()}`,
+            timestamp: now,
+            action: 'Manager Approved (Awaiting Director)',
+            user: currentUser.name,
+            role: currentUser.role,
+            comment: comment || 'Manager approved vendor assignment, awaiting director sign-off',
+            newStatus: 'Pending Director Approval',
+          })
+        });
+
+        pushNotification(
+          `Ticket Needs Director Approval (${ticketId})`,
+          `Manager has requested to assign ${vendor.name}. Pending your approval.`,
+          ['director', 'admin'],
+          'info',
+          { ticketId }
+        );
+        addAudit('TICKET_MANAGER_APPROVED', `Ticket ${ticketId}`, { ticketId, comment: comment || 'Awaiting Director' });
+      } catch (e) { console.error(e); }
+      return;
+    }
+
+    // Otherwise (Director is approving, or admin), finalize assignment and create Work Order
     const count = workOrders.length + 10;
     const woId = `WO-2026-${String(count).padStart(5, '0')}`;
     
@@ -578,7 +609,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       
       await updateDoc(doc(db, "tickets", ticketId), {
         status: 'Quotation Pending',
-        assignedVendorId: vendor.id,
+        assignedVendorId: vendor.id, // already set, but good to ensure
         assignedVendorName: vendor.name,
         updatedAt: now,
         timeline: arrayUnion({
