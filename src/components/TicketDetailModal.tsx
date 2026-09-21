@@ -40,7 +40,7 @@ export const TicketDetailModal: React.FC<TicketDetailModalProps> = ({
     workOrders,
     approveTicket,
     rejectTicket,
-    requestClarification,
+    clarifyTicket,
     addInternalComment,
     reviewQuotation,
     verifyAndClose,
@@ -100,7 +100,7 @@ export const TicketDetailModal: React.FC<TicketDetailModalProps> = ({
       setActionError('Please enter clarification questions.');
       return;
     }
-    requestClarification(ticket.id, actionComment);
+    clarifyTicket(ticket.id, actionComment);
     setActiveAction('none');
   };
 
