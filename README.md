@@ -46,3 +46,33 @@ A comprehensive, role-based asset and service management web application designe
 The application is pre-configured to connect to a live Firebase instance. No local database setup or Docker containers are required. The frontend connects directly to Firebase Firestore using the credentials provided in `src/config/firebase.ts`.
 
 When deploying to production (e.g., DigitalOcean App Platform), simply build the application (`npm run build`) and serve the static files from the `dist` directory. The browser will handle the database connections natively.
+
+
+Login Roles & Access:
+Director (Full Access)
+
+Name: Krishna Mittal
+Email: krishna.mittal@infominer.in
+Password: password
+Access: Every feature and action across the platform.
+(Full Access)
+
+Name: Eshan Saxena
+Email: eshan.saxena@infominer.in
+Password: password
+Access: Every feature and action across the platform.
+Managers (Add/Delete Assets, Employees, and Vendors)
+
+Users: Swati Katiyar, Arif, Shavya Agarwal
+Emails:
+swati.katiyar@infominer.in
+arif@infominer.in
+shavya.agarwal@infominer.in
+Password: password
+Access: Granted full permission to add/edit/delete Employees, Assets, and Vendors as requested.
+Vendor Login
+
+Name: Vendor (Authorized Service Lead)
+Email: service@abctechnologies.in
+Password: password
+Access: Dedicated vendor portal for managing work orders and quotations.

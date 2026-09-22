@@ -99,6 +99,7 @@ export type TicketCategory =
 export type TicketStatus =
   | 'Submitted'
   | 'Under Management Review'
+  | 'Pending Director Approval'
   | 'Clarification Required'
   | 'Approved'
   | 'Rejected'
@@ -175,6 +176,7 @@ export interface Ticket {
   clarificationNote?: string;
   closureNote?: string;
   resolvedAt?: string;
+  quotationId?: string;
 }
 
 export interface Quotation {

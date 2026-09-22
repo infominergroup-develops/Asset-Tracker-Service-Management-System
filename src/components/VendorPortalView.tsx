@@ -205,7 +205,9 @@ export const VendorPortalView: React.FC<VendorPortalViewProps> = ({ onSelectTick
           ) : (
             vendorWorkOrders.map((wo) => {
               const ticket = tickets.find((t) => t.id === wo.ticketId);
-              const quote = quotations.find((q) => q.workOrderId === wo.id);
+              const quote = wo.quotationId
+                ? quotations.find((q) => q.id === wo.quotationId)
+                : quotations.filter((q) => q.workOrderId === wo.id).sort((a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime())[0];
 
               return (
                 <div key={wo.id} className="p-5 hover:bg-slate-50/70 transition space-y-3">
@@ -292,7 +294,7 @@ export const VendorPortalView: React.FC<VendorPortalViewProps> = ({ onSelectTick
 
                     <div className="flex items-center gap-2">
                       {/* Can submit or revise quote */}
-                      {(!quote || quote.status === 'Revision Required') && (
+                      {(!quote || quote.status === 'Revision Required' || quote.status === 'Rejected') && (
                         <button
                           onClick={() => setActiveWorkOrderForQuote(wo)}
                           className="px-3.5 py-1.5 rounded-lg bg-[#eb8a23] hover:bg-[#d97917] text-white font-bold text-xs shadow-xs flex items-center gap-1.5"

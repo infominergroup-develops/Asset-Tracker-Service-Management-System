@@ -59,7 +59,9 @@ export const TicketDetailModal: React.FC<TicketDetailModalProps> = ({
   const [quotationDecision, setQuotationDecision] = useState<'Approved' | 'Revision Required' | 'Rejected'>('Approved');
 
   // Linked items
-  const linkedQuotation = quotations.find((q) => q.ticketId === ticket.id);
+  const linkedQuotation = ticket.quotationId 
+    ? quotations.find((q) => q.id === ticket.quotationId)
+    : quotations.filter((q) => q.ticketId === ticket.id).sort((a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime())[0];
   const linkedWorkOrder = workOrders.find((w) => w.ticketId === ticket.id);
 
   const canApproveTicket =
