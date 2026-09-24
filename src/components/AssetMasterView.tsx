@@ -21,6 +21,8 @@ import {
   ShieldCheck,
   FileSpreadsheet,
   Trash2,
+  Edit2,
+  Download,
 } from 'lucide-react';
 
 interface AssetMasterViewProps {
@@ -39,6 +41,7 @@ export const AssetMasterView: React.FC<AssetMasterViewProps> = ({
   const [categoryFilter, setCategoryFilter] = useState<string>('All');
   const [statusFilter, setStatusFilter] = useState<string>('All');
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [editingAsset, setEditingAsset] = useState<Asset | null>(null);
 
   // New Asset Form State
   const [newName, setNewName] = useState('');
@@ -124,42 +127,128 @@ export const AssetMasterView: React.FC<AssetMasterViewProps> = ({
           name: newEmployeeName.trim(),
           department: newDept,
           entity: newEntity,
-          email: `${newEmployeeName.trim().toLowerCase().replace(/\s+/g, '.')}@example.com`,
           phone: '0000000000',
           location: newLocation
         });
       }
     }
 
-    await createAsset({
-      name: newName,
-      category: newCategory,
-      type: newType,
-      brand: newBrand,
-      model: newModel,
-      serialNumber: newSerial,
-      purchaseDate: newPurchaseDate,
-      purchaseCost: Number(newPurchaseCost) || 0,
-      warrantyExpiry: newWarrantyExpiry,
-      vendorId: finalVendorId,
-      vendorName: finalVendorName,
-      entity: newEntity,
-      department: newDept,
-      location: newLocation,
-      assignedEmployeeName: newEmployeeName || undefined,
-      responsibleManager: newManager,
-      condition: newCondition,
-      status: newStatus,
-      notes: newNotes,
-      softwareName: newSoftwareName,
-      softwareKey: newSoftwareKey,
-      softwareExpiry: newSoftwareExpiry,
-      antivirusName: newAntivirusName,
-      antivirusKey: newAntivirusKey,
-      antivirusExpiry: newAntivirusExpiry,
-    });
+    if (editingAsset) {
+      await updateAsset(editingAsset.id, {
+        name: newName,
+        category: newCategory,
+        type: newType,
+        brand: newBrand,
+        model: newModel,
+        serialNumber: newSerial,
+        purchaseDate: newPurchaseDate,
+        purchaseCost: Number(newPurchaseCost) || 0,
+        warrantyExpiry: newWarrantyExpiry,
+        vendorId: finalVendorId,
+        vendorName: finalVendorName,
+        entity: newEntity,
+        department: newDept,
+        location: newLocation,
+        assignedEmployeeName: newEmployeeName || undefined,
+        responsibleManager: newManager,
+        condition: newCondition,
+        status: newStatus,
+        notes: newNotes,
+        softwareName: newSoftwareName,
+        softwareKey: newSoftwareKey,
+        softwareExpiry: newSoftwareExpiry,
+        antivirusName: newAntivirusName,
+        antivirusKey: newAntivirusKey,
+        antivirusExpiry: newAntivirusExpiry,
+      });
+    } else {
+      await createAsset({
+        name: newName,
+        category: newCategory,
+        type: newType,
+        brand: newBrand,
+        model: newModel,
+        serialNumber: newSerial,
+        purchaseDate: newPurchaseDate,
+        purchaseCost: Number(newPurchaseCost) || 0,
+        warrantyExpiry: newWarrantyExpiry,
+        vendorId: finalVendorId,
+        vendorName: finalVendorName,
+        entity: newEntity,
+        department: newDept,
+        location: newLocation,
+        assignedEmployeeName: newEmployeeName || undefined,
+        responsibleManager: newManager,
+        condition: newCondition,
+        status: newStatus,
+        notes: newNotes,
+        softwareName: newSoftwareName,
+        softwareKey: newSoftwareKey,
+        softwareExpiry: newSoftwareExpiry,
+        antivirusName: newAntivirusName,
+        antivirusKey: newAntivirusKey,
+        antivirusExpiry: newAntivirusExpiry,
+      });
+    }
 
     setShowCreateModal(false);
+    setEditingAsset(null);
+  };
+
+  const openEditModal = (asset: Asset) => {
+    setEditingAsset(asset);
+    setNewName(asset.name);
+    setNewCategory(asset.category);
+    setNewType(asset.type);
+    setNewBrand(asset.brand);
+    setNewModel(asset.model);
+    setNewSerial(asset.serialNumber);
+    setNewPurchaseDate(asset.purchaseDate);
+    setNewPurchaseCost(String(asset.purchaseCost));
+    setNewWarrantyExpiry(asset.warrantyExpiry);
+    setNewVendorId(asset.vendorId);
+    setNewVendorName(asset.vendorName);
+    setNewEntity(asset.entity);
+    setNewDept(asset.department);
+    setNewLocation(asset.location);
+    setNewEmployeeName(asset.assignedEmployeeName || '');
+    setNewManager(asset.responsibleManager);
+    setNewCondition(asset.condition);
+    setNewStatus(asset.status);
+    setNewNotes(asset.notes || '');
+    setNewSoftwareName(asset.softwareName || '');
+    setNewSoftwareKey(asset.softwareKey || '');
+    setNewSoftwareExpiry(asset.softwareExpiry || '');
+    setNewAntivirusName(asset.antivirusName || '');
+    setNewAntivirusKey(asset.antivirusKey || '');
+    setNewAntivirusExpiry(asset.antivirusExpiry || '');
+    setShowCreateModal(true);
+  };
+
+  const handleExportExcel = () => {
+    const headers = [
+      'Asset ID', 'Name', 'Category', 'Type', 'Brand', 'Model',
+      'Serial Number', 'Purchase Date', 'Purchase Cost (INR)', 'Warranty Expiry',
+      'Vendor', 'Entity', 'Department', 'Location', 'Custodian',
+      'Responsible Manager', 'Condition', 'Status', 'Notes'
+    ];
+    const rows = filteredAssets.map(a => [
+      a.id, a.name, a.category, a.type, a.brand, a.model,
+      a.serialNumber, a.purchaseDate, a.purchaseCost, a.warrantyExpiry,
+      a.vendorName, a.entity, a.department, a.location,
+      a.assignedEmployeeName || 'Unassigned',
+      a.responsibleManager, a.condition, a.status, a.notes || ''
+    ]);
+    const csvContent = [headers, ...rows]
+      .map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+      .join('\n');
+    const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Asset_Master_${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   // Status badge styling
@@ -197,7 +286,7 @@ export const AssetMasterView: React.FC<AssetMasterViewProps> = ({
           >
             <ArrowLeft className="w-4 h-4" /> Back to Asset Master
           </button>
-          <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2">
             {(role === 'admin' || role === 'director' || role === 'manager') && (
               <button
                 onClick={async () => {
@@ -209,6 +298,14 @@ export const AssetMasterView: React.FC<AssetMasterViewProps> = ({
                 className="px-3.5 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition shadow-xs flex items-center gap-1.5"
               >
                 <Trash2 className="w-3.5 h-3.5" /> Delete Asset
+              </button>
+            )}
+            {(role === 'admin' || role === 'director' || role === 'manager') && (
+              <button
+                onClick={() => openEditModal(selectedAsset)}
+                className="px-3.5 py-1.5 rounded-lg bg-slate-700 hover:bg-slate-800 text-white text-xs font-bold transition shadow-xs flex items-center gap-1.5"
+              >
+                <Edit2 className="w-3.5 h-3.5" /> Edit Asset
               </button>
             )}
             {onRaiseTicketForAsset && (
@@ -454,10 +551,44 @@ export const AssetMasterView: React.FC<AssetMasterViewProps> = ({
         </div>
 
         <div className="flex items-center gap-2">
+          <button
+            onClick={handleExportExcel}
+            className="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-sm transition flex items-center gap-1.5"
+          >
+            <Download className="w-4 h-4" /> Export Excel
+          </button>
           {(role === 'admin' || role === 'manager' || role === 'director') && (
             <button
               id="create-new-asset-btn"
-              onClick={() => setShowCreateModal(true)}
+              onClick={() => {
+                setEditingAsset(null);
+                setNewName('');
+                setNewCategory('IT Equipment');
+                setNewType('Laptop');
+                setNewBrand('');
+                setNewModel('');
+                setNewSerial('');
+                setNewPurchaseDate('2024-01-01');
+                setNewPurchaseCost('65000');
+                setNewWarrantyExpiry('2027-01-01');
+                setNewVendorId(vendors[0]?.id || '');
+                setNewVendorName('');
+                setNewEntity(entities[0] || '');
+                setNewDept(departments[0] || '');
+                setNewLocation(locations[0] || '');
+                setNewEmployeeName('');
+                setNewManager('Swati Katiyar (Operations Manager)');
+                setNewCondition('Excellent');
+                setNewStatus('Active');
+                setNewNotes('');
+                setNewSoftwareName('');
+                setNewSoftwareKey('');
+                setNewSoftwareExpiry('');
+                setNewAntivirusName('');
+                setNewAntivirusKey('');
+                setNewAntivirusExpiry('');
+                setShowCreateModal(true);
+              }}
               className="px-4 py-2 rounded-lg bg-[#eb8a23] hover:bg-[#d97917] text-white font-bold text-xs shadow-sm transition flex items-center gap-1.5"
             >
               <Plus className="w-4 h-4" /> Add New Asset
@@ -572,15 +703,29 @@ export const AssetMasterView: React.FC<AssetMasterViewProps> = ({
                       </span>
                     </td>
                     <td className="px-4 py-3 text-right">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedAssetId(ast.id);
-                        }}
-                        className="px-2.5 py-1 rounded bg-white border border-slate-300 hover:border-[#eb8a23] text-slate-700 font-semibold text-[11px] shadow-2xs transition"
-                      >
-                        Details →
-                      </button>
+                      <div className="flex items-center justify-end gap-2">
+                        {(role === 'admin' || role === 'manager' || role === 'director') && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openEditModal(ast);
+                            }}
+                            className="p-1.5 rounded bg-white border border-slate-300 hover:border-slate-500 text-slate-600 font-semibold text-[11px] shadow-2xs transition"
+                            title="Edit Asset"
+                          >
+                            <Edit2 className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedAssetId(ast.id);
+                          }}
+                          className="px-2.5 py-1 rounded bg-white border border-slate-300 hover:border-[#eb8a23] text-slate-700 font-semibold text-[11px] shadow-2xs transition"
+                        >
+                          Details →
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -590,13 +735,13 @@ export const AssetMasterView: React.FC<AssetMasterViewProps> = ({
         </div>
       </div>
 
-      {/* CREATE NEW ASSET MODAL */}
+      {/* CREATE / EDIT ASSET MODAL */}
       {showCreateModal && (
         <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-xl shadow-2xl border border-slate-200 w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
             <div className="bg-[#2d3e50] text-white px-6 py-4 flex items-center justify-between shrink-0">
-              <h3 className="font-bold text-base">Add New Asset to Master</h3>
-              <button onClick={() => setShowCreateModal(false)} className="text-slate-300 hover:text-white">
+              <h3 className="font-bold text-base">{editingAsset ? `Edit Asset — ${editingAsset.id}` : 'Add New Asset to Master'}</h3>
+              <button onClick={() => { setShowCreateModal(false); setEditingAsset(null); }} className="text-slate-300 hover:text-white">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -772,7 +917,7 @@ export const AssetMasterView: React.FC<AssetMasterViewProps> = ({
               <div className="flex justify-end gap-3 pt-3 border-t border-slate-200">
                 <button
                   type="button"
-                  onClick={() => setShowCreateModal(false)}
+                  onClick={() => { setShowCreateModal(false); setEditingAsset(null); }}
                   className="px-4 py-2 border border-slate-300 text-slate-600 rounded-lg"
                 >
                   Cancel
@@ -781,7 +926,7 @@ export const AssetMasterView: React.FC<AssetMasterViewProps> = ({
                   type="submit"
                   className="px-5 py-2 bg-[#eb8a23] hover:bg-[#d97917] text-white font-bold rounded-lg shadow-xs"
                 >
-                  Create Asset
+                  {editingAsset ? 'Save Changes' : 'Create Asset'}
                 </button>
               </div>
             </form>

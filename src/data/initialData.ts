@@ -10,7 +10,6 @@ export const INITIAL_EMPLOYEES: Employee[] = [
   {
     id: 'EMP-104',
     name: 'Rahul Agrawal',
-    email: 'rahul.agrawal@infominer.in',
     phone: '+91 98370 12345',
     department: 'Technology & Engineering',
     entity: 'Infominer Services Pvt. Ltd. (Corporate)',
@@ -19,7 +18,6 @@ export const INITIAL_EMPLOYEES: Employee[] = [
   {
     id: 'EMP-FAC-01',
     name: 'Pooja Rawat',
-    email: 'pooja.rawat@infominer.in',
     phone: '+91 99999 12345',
     department: 'Facilities & Administration',
     entity: 'Infominer Services Pvt. Ltd. (Corporate)',
@@ -28,7 +26,6 @@ export const INITIAL_EMPLOYEES: Employee[] = [
   {
     id: 'EMP-FIN-01',
     name: 'Sneha Kapoor',
-    email: 'sneha.kapoor@infominer.in',
     phone: '+91 98888 12345',
     department: 'Finance & Accounts',
     entity: 'Infominer Services Pvt. Ltd. (Corporate)',

@@ -5,13 +5,11 @@ import {
   Search,
   Plus,
   Phone,
-  Mail,
   MapPin,
   Building2,
   Edit2,
   X,
   Users,
-  Briefcase
 } from 'lucide-react';
 
 export const EmployeesDirectoryView: React.FC = () => {
@@ -24,7 +22,6 @@ export const EmployeesDirectoryView: React.FC = () => {
 
   const [id, setId] = useState('');
   const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [department, setDepartment] = useState(departments[0] || '');
   const [entity, setEntity] = useState(entities[0] || '');
@@ -34,7 +31,6 @@ export const EmployeesDirectoryView: React.FC = () => {
     setEditingEmployee(null);
     setId(`EMP-${Math.floor(Math.random() * 900) + 100}`);
     setName('');
-    setEmail('');
     setPhone('');
     setDepartment(departments[0] || '');
     setEntity(entities[0] || '');
@@ -46,7 +42,6 @@ export const EmployeesDirectoryView: React.FC = () => {
     setEditingEmployee(e);
     setId(e.id);
     setName(e.name);
-    setEmail(e.email);
     setPhone(e.phone);
     setDepartment(e.department);
     setEntity(e.entity);
@@ -59,7 +54,6 @@ export const EmployeesDirectoryView: React.FC = () => {
     if (editingEmployee) {
       updateEmployee(editingEmployee.id, {
         name,
-        email,
         phone,
         department,
         entity,
@@ -69,7 +63,6 @@ export const EmployeesDirectoryView: React.FC = () => {
       createEmployee({
         id,
         name,
-        email,
         phone,
         department,
         entity,
@@ -82,8 +75,7 @@ export const EmployeesDirectoryView: React.FC = () => {
   const filteredEmployees = employees.filter((e) => {
     const matchesSearch =
       e.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      e.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      e.email.toLowerCase().includes(searchQuery.toLowerCase());
+      e.id.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesDept = departmentFilter === 'All' || e.department === departmentFilter;
     return matchesSearch && matchesDept;
   });
@@ -117,7 +109,7 @@ export const EmployeesDirectoryView: React.FC = () => {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search employee name, ID, or email..."
+              placeholder="Search employee name or ID..."
               className="pl-8 pr-3 py-1.5 border border-slate-300 rounded-lg w-52 sm:w-72 focus:outline-hidden focus:border-[#eb8a23]"
             />
           </div>
@@ -181,10 +173,6 @@ export const EmployeesDirectoryView: React.FC = () => {
                 <span>{employee.phone}</span>
               </div>
               <div className="flex items-center gap-2">
-                <Mail className="w-3.5 h-3.5 text-slate-400" />
-                <span>{employee.email}</span>
-              </div>
-              <div className="flex items-center gap-2">
                 <Building2 className="w-3.5 h-3.5 text-slate-400" />
                 <span>{employee.entity}</span>
               </div>
@@ -216,10 +204,6 @@ export const EmployeesDirectoryView: React.FC = () => {
                 <div>
                   <label className="block font-semibold text-slate-700 mb-1">Full Name</label>
                   <input required type="text" value={name} onChange={(e) => setName(e.target.value)} className="w-full px-3 py-2 border border-slate-300 rounded-lg" />
-                </div>
-                <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Email Address</label>
-                  <input required type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full px-3 py-2 border border-slate-300 rounded-lg" />
                 </div>
                 <div>
                   <label className="block font-semibold text-slate-700 mb-1">Phone Number</label>

@@ -22,7 +22,7 @@ export const PublicTicketTracker: React.FC<PublicTicketTrackerProps> = ({ initia
   const { tickets } = useApp();
 
   const [ticketIdInput, setTicketIdInput] = useState(initialTicketId || '');
-  const [emailInput, setEmailInput] = useState('');
+  const [phoneInput, setPhoneInput] = useState('');
   const [activeTicket, setActiveTicket] = useState<Ticket | null>(null);
   const [errorMsg, setErrorMsg] = useState('');
   const [isVerified, setIsVerified] = useState(false);
@@ -32,7 +32,7 @@ export const PublicTicketTracker: React.FC<PublicTicketTrackerProps> = ({ initia
       setTicketIdInput(initialTicketId);
       const t = tickets.find((item) => item.id.toLowerCase() === initialTicketId.toLowerCase());
       if (t) {
-        setEmailInput(t.employeeEmail);
+        setPhoneInput(t.employeePhone);
       }
     }
   }, [initialTicketId, tickets]);
@@ -43,31 +43,31 @@ export const PublicTicketTracker: React.FC<PublicTicketTrackerProps> = ({ initia
     setIsVerified(false);
 
     const cleanId = ticketIdInput.trim().toUpperCase();
-    const cleanEmail = emailInput.trim().toLowerCase();
+    const cleanPhone = phoneInput.trim().replace(/\s+/g, '');
 
     if (!cleanId) {
       setErrorMsg('Please enter a Ticket ID (e.g. TKT-2026-00125).');
       return;
     }
-    if (!cleanEmail) {
-      setErrorMsg('Please enter the registered work email used when filing.');
+    if (!cleanPhone) {
+      setErrorMsg('Please enter the registered phone number used when filing.');
       return;
     }
 
     const found = tickets.find(
       (t) =>
         t.id.toUpperCase() === cleanId &&
-        (t.employeeEmail.toLowerCase() === cleanEmail || t.employeePhone.includes(cleanEmail))
+        t.employeePhone.replace(/\s+/g, '').includes(cleanPhone)
     );
 
     if (found) {
       setActiveTicket(found);
       setIsVerified(true);
     } else {
-      // Check if ticket exists but email doesn't match
+      // Check if ticket exists but phone doesn't match
       const exists = tickets.find((t) => t.id.toUpperCase() === cleanId);
       if (exists) {
-        setErrorMsg('The email does not match our records for this ticket. Please verify.');
+        setErrorMsg('The phone number does not match our records for this ticket. Please verify.');
       } else {
         setErrorMsg(`No ticket found matching ID "${cleanId}". Please check your reference.`);
       }
@@ -138,7 +138,7 @@ export const PublicTicketTracker: React.FC<PublicTicketTrackerProps> = ({ initia
         </h1>
         <p className="text-slate-300 text-xs sm:text-sm mt-1 max-w-2xl">
           Check live real-time status updates on your reported equipment or facilities issue.
-          Requires no login — simply enter your Ticket ID and registered email.
+          Requires no login — simply enter your Ticket ID and registered phone number.
         </p>
       </div>
 
@@ -165,16 +165,16 @@ export const PublicTicketTracker: React.FC<PublicTicketTrackerProps> = ({ initia
 
             <div>
               <label className="block font-semibold text-slate-700 mb-1">
-                Registered Work Email <span className="text-rose-500">*</span>
+                Registered Phone Number <span className="text-rose-500">*</span>
               </label>
               <div className="relative">
                 <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
                 <input
-                  type="email"
+                  type="tel"
                   required
-                  value={emailInput}
-                  onChange={(e) => setEmailInput(e.target.value)}
-                  placeholder="e.g. rahul.agrawal@infominer.in"
+                  value={phoneInput}
+                  onChange={(e) => setPhoneInput(e.target.value)}
+                  placeholder="e.g. +91 98370 12345"
                   className="w-full pl-9 pr-3 py-2 border border-slate-300 rounded-lg focus:outline-hidden focus:border-[#eb8a23]"
                 />
               </div>

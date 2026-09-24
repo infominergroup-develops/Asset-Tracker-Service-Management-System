@@ -32,7 +32,6 @@ export const EmployeeTicketForm: React.FC<EmployeeTicketFormProps> = ({
   // Form states
   const [employeeName, setEmployeeName] = useState('');
   const [employeeId, setEmployeeId] = useState('');
-  const [employeeEmail, setEmployeeEmail] = useState('');
   const [employeePhone, setEmployeePhone] = useState('');
   const [department, setDepartment] = useState(departments[0] || 'Technology & Engineering');
   const [entity, setEntity] = useState(entities[0] || 'Infominer Services Pvt. Ltd. (Corporate)');
@@ -44,7 +43,6 @@ export const EmployeeTicketForm: React.FC<EmployeeTicketFormProps> = ({
       const found = employees.find(e => e.id.toLowerCase() === employeeId.toLowerCase());
       if (found) {
         setEmployeeName(found.name);
-        setEmployeeEmail(found.email);
         setEmployeePhone(found.phone);
         setDepartment(found.department);
         setEntity(found.entity);
@@ -110,7 +108,6 @@ export const EmployeeTicketForm: React.FC<EmployeeTicketFormProps> = ({
   const validateForm = () => {
     const errors: string[] = [];
     if (!employeeName.trim()) errors.push('Employee name is required.');
-    if (!employeeEmail.trim() || !employeeEmail.includes('@')) errors.push('A valid work email is required.');
     if (!employeePhone.trim()) errors.push('Contact phone number is required.');
     if (!isAssetNotListed && !selectedAsset) errors.push('Please select the affected asset or check "Asset Not Listed".');
     if (isAssetNotListed && !manualAssetName.trim()) errors.push('Please enter the name/description of the unlisted asset.');
@@ -148,7 +145,7 @@ export const EmployeeTicketForm: React.FC<EmployeeTicketFormProps> = ({
       assetCategory: finalCategory,
       employeeName,
       employeeId: employeeId || undefined,
-      employeeEmail,
+      employeeEmail: '',
       employeePhone,
       department,
       entity,
@@ -232,7 +229,7 @@ export const EmployeeTicketForm: React.FC<EmployeeTicketFormProps> = ({
             </p>
             <p className="text-slate-600 leading-relaxed">
               Save this ticket number. You can visit the <strong>"Track Your Ticket"</strong> tab anytime and enter your
-              ticket ID along with your email ({employeeEmail}) to view live real-time status updates from management and vendors.
+              ticket ID to view live real-time status updates from management and vendors.
             </p>
           </div>
 
@@ -292,10 +289,6 @@ export const EmployeeTicketForm: React.FC<EmployeeTicketFormProps> = ({
                 <div>
                   <span className="text-slate-500 block">Employee ID:</span>
                   <span className="font-semibold text-slate-800">{employeeId || 'N/A'}</span>
-                </div>
-                <div>
-                  <span className="text-slate-500 block">Contact Email:</span>
-                  <span className="font-semibold text-slate-800">{employeeEmail}</span>
                 </div>
                 <div>
                   <span className="text-slate-500 block">Contact Phone:</span>
@@ -490,23 +483,6 @@ export const EmployeeTicketForm: React.FC<EmployeeTicketFormProps> = ({
                 placeholder="e.g. EMP-104"
                 className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-hidden focus:border-[#eb8a23] focus:ring-1 focus:ring-[#eb8a23]"
               />
-            </div>
-
-            <div>
-              <label className="block font-semibold text-slate-700 mb-1">
-                Work Email <span className="text-rose-500">*</span>
-              </label>
-              <input
-                type="email"
-                required
-                value={employeeEmail}
-                onChange={(e) => setEmployeeEmail(e.target.value)}
-                placeholder="e.g. rahul.agrawal@infominer.in"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-hidden focus:border-[#eb8a23] focus:ring-1 focus:ring-[#eb8a23]"
-              />
-              <span className="text-[10px] text-slate-400 mt-0.5 block">
-                Required to verify and track your ticket later without login.
-              </span>
             </div>
 
             <div>
