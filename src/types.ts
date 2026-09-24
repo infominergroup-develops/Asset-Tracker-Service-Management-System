@@ -207,6 +207,8 @@ export type WorkOrderStatus =
   | 'Assigned'
   | 'Accepted'
   | 'Quotation Pending'
+  | 'Quotation Under Review'
+  | 'Quotation Revision Required'
   | 'Quotation Approved'
   | 'Work Scheduled'
   | 'Work In Progress'
