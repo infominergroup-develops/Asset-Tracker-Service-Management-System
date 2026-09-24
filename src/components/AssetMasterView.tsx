@@ -658,7 +658,6 @@ export const AssetMasterView: React.FC<AssetMasterViewProps> = ({
                   <label className="block font-semibold text-slate-700 mb-1">Serial Number</label>
                   <input
                     type="text"
-                    required
                     value={newSerial}
                     onChange={(e) => setNewSerial(e.target.value)}
                     placeholder="e.g. CN-0G6T4M-..."
@@ -670,7 +669,6 @@ export const AssetMasterView: React.FC<AssetMasterViewProps> = ({
                   <label className="block font-semibold text-slate-700 mb-1">Purchase Cost (₹)</label>
                   <input
                     type="number"
-                    required
                     value={newPurchaseCost}
                     onChange={(e) => setNewPurchaseCost(e.target.value)}
                     placeholder="75000"
@@ -681,7 +679,6 @@ export const AssetMasterView: React.FC<AssetMasterViewProps> = ({
                   <label className="block font-semibold text-slate-700 mb-1">Warranty Expiry Date</label>
                   <input
                     type="date"
-                    required
                     value={newWarrantyExpiry}
                     onChange={(e) => setNewWarrantyExpiry(e.target.value)}
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg"
@@ -692,7 +689,6 @@ export const AssetMasterView: React.FC<AssetMasterViewProps> = ({
                   <label className="block font-semibold text-slate-700 mb-1">Vendor Name</label>
                   <input
                     type="text"
-                    required
                     value={newVendorName}
                     onChange={(e) => setNewVendorName(e.target.value)}
                     placeholder="e.g. Dell Inc."
