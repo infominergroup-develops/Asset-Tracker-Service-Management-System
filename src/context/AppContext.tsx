@@ -56,6 +56,9 @@ interface AppContextType {
   entities: string[];
   departments: string[];
   locations: string[];
+  addLocation: (address: string) => Promise<void>;
+  updateLocation: (oldAddress: string, newAddress: string) => Promise<void>;
+  deleteLocation: (address: string) => Promise<void>;
   employees: Employee[];
 
   // Actions
@@ -297,6 +300,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [approvalConfig, setApprovalConfig] = useState<ApprovalConfig>(INITIAL_APPROVAL_CONFIG);
+  const [locations, setLocations] = useState<string[]>(INITIAL_LOCATIONS);
 
   const hasCheckedExpiries = React.useRef(false);
 
@@ -371,11 +375,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const unsubConfig = onSnapshot(doc(db, "settings", "approvalConfig"), (docSnap) => {
       if (docSnap.exists()) setApprovalConfig(docSnap.data() as ApprovalConfig);
     });
+    const unsubLocations = onSnapshot(doc(db, "settings", "locations"), (docSnap) => {
+      if (docSnap.exists() && docSnap.data().addresses) {
+        setLocations(docSnap.data().addresses);
+      }
+    });
 
     return () => {
       unsubEmployees(); unsubVendors(); unsubTickets();
       unsubQuotations(); unsubWorkOrders(); unsubAuditLogs();
-      unsubNotifs(); unsubConfig();
+      unsubNotifs(); unsubConfig(); unsubLocations();
     };
   }, []);
 
@@ -448,6 +457,27 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     try {
       await setDoc(doc(db, "notifications", newNotif.id), newNotif);
     } catch (e) { console.error(e); }
+  };
+
+  const addLocation = async (address: string) => {
+    if (!['admin', 'manager', 'director'].includes(role)) return;
+    const newLocations = [...locations, address];
+    await setDoc(doc(db, "settings", "locations"), { addresses: newLocations }, { merge: true });
+    await addAudit('Added Location', 'settings', { newValue: address });
+  };
+  
+  const updateLocation = async (oldAddress: string, newAddress: string) => {
+    if (!['admin', 'manager', 'director'].includes(role)) return;
+    const newLocations = locations.map(l => l === oldAddress ? newAddress : l);
+    await setDoc(doc(db, "settings", "locations"), { addresses: newLocations }, { merge: true });
+    await addAudit('Updated Location', 'settings', { oldValue: oldAddress, newValue: newAddress });
+  };
+
+  const deleteLocation = async (address: string) => {
+    if (!['admin', 'manager', 'director'].includes(role)) return;
+    const newLocations = locations.filter(l => l !== address);
+    await setDoc(doc(db, "settings", "locations"), { addresses: newLocations }, { merge: true });
+    await addAudit('Deleted Location', 'settings', { oldValue: address });
   };
 
   // 1. Create Ticket (No Login)
@@ -1291,7 +1321,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         approvalConfig,
         entities: INITIAL_ENTITIES,
         departments: INITIAL_DEPARTMENTS,
-        locations: INITIAL_LOCATIONS,
+        locations,
+        addLocation,
+        updateLocation,
+        deleteLocation,
         employees,
         createTicket,
         approveTicket,

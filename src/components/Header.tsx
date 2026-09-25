@@ -51,9 +51,10 @@ export const Header: React.FC<HeaderProps> = ({
   const [showNotifMenu, setShowNotifMenu] = useState(false);
 
   // Financial metric for navbar highlight
-  const totalServiceSpend = quotations
-    .filter((q) => q.status === 'Approved')
-    .reduce((sum, q) => sum + q.totalAmount, 0);
+  const activeWorkOrderStatuses = ['Work Scheduled', 'Work In Progress', 'Awaiting Parts'];
+  const totalServiceSpend = workOrders
+    .filter((wo) => activeWorkOrderStatuses.includes(wo.status))
+    .reduce((sum, wo) => sum + (wo.currentQuotationAmount || 0), 0);
 
   const pendingApprovalsCount = tickets.filter(
     (t) => t.status === 'Submitted' || t.status === 'Under Management Review'
@@ -346,6 +347,17 @@ export const Header: React.FC<HeaderProps> = ({
                 >
                   Employees
                 </button>
+                <button
+                  id="tab-mgmt-locations"
+                  onClick={() => setActiveTab('locations')}
+                  className={`px-3 py-1.5 rounded-md font-medium transition ${
+                    activeTab === 'locations'
+                      ? 'bg-[#eb8a23] text-white shadow-xs font-bold'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200'
+                  }`}
+                >
+                  Locations &amp; Addresses
+                </button>
                 {role === 'director' && (
                   <button
                     id="tab-mgmt-user-management"
@@ -441,6 +453,17 @@ export const Header: React.FC<HeaderProps> = ({
                   }`}
                 >
                   Employees Directory
+                </button>
+                <button
+                  id="tab-admin-locations"
+                  onClick={() => setActiveTab('locations')}
+                  className={`px-3 py-1.5 rounded-md font-medium transition ${
+                    activeTab === 'locations'
+                      ? 'bg-[#eb8a23] text-white shadow-xs font-bold'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200'
+                  }`}
+                >
+                  Locations &amp; Addresses
                 </button>
                 <button
                   id="tab-admin-reports"

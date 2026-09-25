@@ -15,6 +15,7 @@ import { AuditLogView } from './components/AuditLogView';
 import { AdminSettingsView } from './components/AdminSettingsView';
 import { TicketDetailModal } from './components/TicketDetailModal';
 import { UserManagementView } from './components/UserManagementView';
+import { LocationsView } from './components/LocationsView';
 import { Ticket, Asset } from './types';
 import { InfominerLogo } from './components/InfominerLogo';
 
@@ -112,6 +113,8 @@ const MainLayout: React.FC = () => {
           <QuotationsListView onSelectTicket={(t) => setSelectedTicket(t)} />
         )}
 
+        {activeTab === 'locations' && <LocationsView />}
+
         {(activeTab === 'audit-log' || activeTab === 'admin-audit' || activeTab === 'reports') && (
           <AuditLogView />
         )}
@@ -138,6 +141,7 @@ const MainLayout: React.FC = () => {
           'vendors',
           'employees',
           'quotations',
+          'locations',
           'audit-log',
           'admin-audit',
           'reports',
